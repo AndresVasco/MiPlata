@@ -46,7 +46,6 @@
     .col-side{grid-column:2;position:sticky;top:24px}
     .tabbar{display:none!important}
     .desktop-nav{display:flex!important}
-    section[data-view]{display:block!important}
     .view-title-desktop{display:block!important}
   }
   .col-main,.col-side{min-width:0}
@@ -69,6 +68,7 @@
   }
 
   .desktop-nav{display:none;gap:8px;margin:0 0 6px}
+  .desktop-nav button.on{background:var(--ink);color:#fff}
   .view-title-desktop{display:none;font-size:17px;font-weight:700;margin:6px 0 12px}
 
   /* ---------- Semáforo (signature) ---------- */
@@ -159,6 +159,7 @@
   .item .amt.in{color:var(--green)}
   .item .amt.out{color:var(--red)}
   .item .amt.sv{color:var(--teal)}
+  .item .amt.nom{color:var(--violet)}
   .del,.edit{
     border:none;background:none;color:var(--muted);font-size:16px;cursor:pointer;padding:6px;
     border-radius:8px;flex:none;
@@ -299,7 +300,7 @@
 
   <div class="col-main">
     <nav class="desktop-nav">
-      <button class="btn soft small" data-goto="resumen">📊 Resumen</button>
+      <button class="btn soft small on" data-goto="resumen">📊 Resumen</button>
       <button class="btn soft small" data-goto="movs">🧾 Movimientos</button>
       <button class="btn soft small" data-goto="deudas">💳 Deudas</button>
     </nav>
@@ -344,11 +345,11 @@
     <section data-view="movs">
       <h2 class="view-title-desktop">Movimientos</h2>
       <div class="card">
-        <h3>Tus gastos fijos ⚡</h3>
-        <p class="sub">Los que se repiten cada mes o quincena (arriendo, servicios, cuotas…). Guárdalos una vez y regístralos con un toque — puedes ajustar el monto antes de guardar si esta vez fue distinto.</p>
+        <h3>Tus fijos de cada periodo ⚡</h3>
+        <p class="sub">Lo que se repite cada mes o quincena: arriendo, servicios, cuotas… ¡y tu ahorro! Guárdalos una vez y regístralos con un toque — puedes ajustar el monto antes de guardar si esta vez fue distinto.</p>
         <div id="fixedList"></div>
         <div class="actions" style="display:flex;gap:10px;margin-top:8px">
-          <button class="btn soft" id="addFixedBtn" style="flex:1">＋ Agregar gasto fijo</button>
+          <button class="btn soft" id="addFixedBtn" style="flex:1">＋ Agregar un fijo</button>
           <button class="btn primary" id="fixApplyAll" style="flex:1">Registrar todos</button>
         </div>
       </div>
@@ -415,6 +416,10 @@
     <div class="field" id="movDebtField" style="display:none">
       <label>¿A cuál de tus deudas corresponde este pago? (su saldo bajará solo)</label>
       <select id="movDebt"></select>
+      <label style="display:flex;align-items:flex-start;gap:8px;margin-top:10px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer">
+        <input type="checkbox" id="movNomina" style="width:18px;height:18px;margin-top:1px;accent-color:var(--violet)">
+        <span>🏢 Ya venía descontado de mi pago (nómina): baja la deuda pero <b>no</b> lo cuentes como gasto de mi bolsillo</span>
+      </label>
     </div>
     <div class="field">
       <label>Descripción (opcional)</label>
@@ -453,6 +458,10 @@
       <label>Interés mensual % (si no sabes, déjalo vacío)</label>
       <input type="text" id="dRate" inputmode="decimal" placeholder="Ej: 2.1">
     </div>
+    <div class="insight info" style="margin-bottom:0">
+      <span class="ico">🏢</span>
+      <p><b>¿Te descuentan la cuota directo de la nómina?</b> Registra tu salario como siempre (el neto que te consignan) y crea un <b>gasto fijo</b> de "Pago de deudas" vinculado a esta deuda, marcando la casilla <b>"me la descuentan de la nómina"</b>. Así el saldo baja solo cada periodo, sin contar como gasto de tu bolsillo.</p>
+    </div>
     <div class="actions">
       <button class="btn soft" id="debtCancel">Cancelar</button>
       <button class="btn primary" id="debtSave">Guardar</button>
@@ -463,10 +472,14 @@
 <!-- ============ MODAL: GASTO FIJO ============ -->
 <div class="overlay" id="fixOverlay">
   <div class="sheet">
-    <h3 id="fixTitle">Agregar gasto fijo</h3>
+    <h3 id="fixTitle">Agregar un fijo</h3>
+    <div class="seg-toggle">
+      <button id="ftGasto" class="gasto on">🛒 Gasto</button>
+      <button id="ftAhorro" class="ahorro">🌱 Ahorro</button>
+    </div>
     <div class="field">
       <label>¿Cómo se llama?</label>
-      <input type="text" id="fName" placeholder="Ej: Arriendo, plan de celular, cuota TC…">
+      <input type="text" id="fName" placeholder="Ej: Arriendo, cuota TC, ahorro quincenal…">
     </div>
     <div class="field">
       <label>¿Cuánto suele ser? (pesos — podrás ajustarlo cada vez que lo registres)</label>
@@ -477,9 +490,33 @@
       <label>Categoría</label>
       <div class="chips" id="fixChips"></div>
     </div>
+    <div class="field" id="fixDebtField" style="display:none">
+      <label>¿A cuál de tus deudas corresponde esta cuota? (cada vez que la registres, el saldo bajará solo — ideal para descuentos de nómina)</label>
+      <select id="fixDebt"></select>
+      <label style="display:flex;align-items:flex-start;gap:8px;margin-top:10px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer">
+        <input type="checkbox" id="fixNomina" style="width:18px;height:18px;margin-top:1px;accent-color:var(--violet)">
+        <span>🏢 Me la descuentan de la nómina: baja la deuda pero <b>no</b> la cuentes como gasto de mi bolsillo</span>
+      </label>
+    </div>
     <div class="actions">
       <button class="btn soft" id="fixCancel">Cancelar</button>
       <button class="btn primary" id="fixSave">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: REGISTRAR TODOS LOS FIJOS ============ -->
+<div class="overlay" id="applyOverlay">
+  <div class="sheet">
+    <h3>Registrar todos los fijos</h3>
+    <p id="applySummary" style="font-size:14px;color:var(--muted);margin-bottom:14px"></p>
+    <div class="field">
+      <label>¿Con qué fecha? (define en cuál quincena quedan)</label>
+      <input type="date" id="applyDate">
+    </div>
+    <div class="actions">
+      <button class="btn soft" id="applyCancel">Cancelar</button>
+      <button class="btn primary" id="applyConfirm">Registrar</button>
     </div>
   </div>
 </div>
@@ -589,16 +626,21 @@ function inPeriod(fecha) {
 }
 const PW = () => currentQ === 'all' ? 'este mes' : 'esta quincena';
 function monthIncome() { // full-month income (for comparing monthly debt payments)
+  // Includes payroll-deducted debt payments: registered net salary + nomina cuotas = real income
   return data.movs
-    .filter(m => m.tipo === 'ingreso' && m.fecha.slice(0, 7) === currentMonth)
+    .filter(m => m.fecha.slice(0, 7) === currentMonth && (m.tipo === 'ingreso' || (m.tipo === 'gasto' && m.nomina)))
     .reduce((s, m) => s + m.monto, 0);
 }
 function monthData() {
   const movs = data.movs.filter(m => inPeriod(m.fecha));
   const ingresos = movs.filter(m => m.tipo === 'ingreso');
+  // Payroll-deducted payments (nomina): the person registers NET salary, so we
+  // gross-up: the cuota counts as spending AND as income. Net effect on the
+  // "disponible" is zero, but the payment shows up in the full analysis.
   const gastos = movs.filter(m => m.tipo === 'gasto');
   const ahorros = movs.filter(m => m.tipo === 'ahorro');
-  const totIn = ingresos.reduce((s, m) => s + m.monto, 0);
+  const totNom = gastos.filter(m => m.nomina).reduce((s, m) => s + m.monto, 0);
+  const totIn = ingresos.reduce((s, m) => s + m.monto, 0) + totNom;
   const totOut = gastos.reduce((s, m) => s + m.monto, 0);
   const totAho = ahorros.reduce((s, m) => s + m.monto, 0);
   const byCat = {};
@@ -606,7 +648,7 @@ function monthData() {
   const cats = Object.entries(byCat)
     .map(([id, amt]) => ({ ...catById(id), amt }))
     .sort((a, b) => b.amt - a.amt);
-  return { movs, ingresos, gastos, ahorros, totIn, totOut, totAho,
+  return { movs, ingresos, gastos, ahorros, totIn, totOut, totAho, totNom,
     balance: totIn - totOut,                    // lo que sobró tras gastos
     disponible: totIn - totOut - totAho,        // lo que queda tras gastos Y ahorro
     cats };
@@ -670,8 +712,8 @@ function renderTraffic(M) {
       ? ` Guardaste ${fmt(M.totAho)} de ahorro 🌱 — más de lo que te sobró tras gastos (${fmt(M.balance)}), por eso el disponible queda en negativo. Si esa plata salió de ahorros anteriores o de la otra quincena, ¡todo en orden!`
       : ` Además guardaste ${fmt(M.totAho)} de ahorro 🌱, ¡bien ahí!`;
   }
-  const desglose = M.totAho > 0
-    ? `disponible ${PW()}: ${fmt(M.totIn)} entró − ${fmt(M.totOut)} gastos − ${fmt(M.totAho)} ahorro`
+  const desglose = M.totAho > 0 || M.totNom > 0
+    ? `disponible ${PW()}: ${fmt(M.totIn)} entró${M.totNom > 0 ? ` (incluye ${fmt(M.totNom)} descontados en nómina)` : ''} − ${fmt(M.totOut)} gastos${M.totAho > 0 ? ` − ${fmt(M.totAho)} ahorro` : ''}`
     : `te quedó ${PW()} (ingresos − gastos)`;
   el.innerHTML = `<div class="face">${face}</div>
     <h2>${title}</h2><p>${msg}${ahoNote}</p>
@@ -736,6 +778,12 @@ function renderInsights(M) {
     const c = catById(biggest.cat);
     add('info', '🔎',
       `El movimiento más caro de ${PW()} fue <b>${biggest.desc || c.name}</b> por <b>${fmt(biggest.monto)}</b> el ${biggest.fecha.slice(8,10)}/${biggest.fecha.slice(5,7)}.`);
+  }
+
+  // 2b. Descuentos de nómina: explicar el ajuste
+  if (M.totNom > 0) {
+    add('info', '🏢',
+      `Te descontaron <b>${fmt(M.totNom)}</b> de la nómina para pagar deudas ${PW()}. Lo sumamos a tus ingresos y a tus gastos por igual: tu disponible no cambia, pero así ves el peso real de esa deuda en tu análisis.`);
   }
 
   // 3. Gastos hormiga
@@ -855,12 +903,12 @@ function renderMovs(M) {
   box.innerHTML = sorted.map(m => {
     const c = catById(m.cat);
     const sign = m.tipo === 'ingreso' ? '+' : '−';
-    const cls = m.tipo === 'ingreso' ? 'in' : (m.tipo === 'ahorro' ? 'sv' : 'out');
+    const cls = m.tipo === 'ingreso' ? 'in' : (m.tipo === 'ahorro' ? 'sv' : (m.nomina ? 'nom' : 'out'));
     return `<div class="item">
       <div class="emoji">${c.emoji}</div>
       <div class="info">
         <div class="t">${m.desc || c.name}</div>
-        <div class="d">${c.name} · ${m.fecha.slice(8,10)}/${m.fecha.slice(5,7)}</div>
+        <div class="d">${c.name} · ${m.fecha.slice(8,10)}/${m.fecha.slice(5,7)}${m.nomina ? ' · 🏢 descontado de nómina' : ''}</div>
       </div>
       <div class="amt ${cls}">${sign}${fmt(m.monto)}</div>
       <button class="edit" data-editmov="${m.id}" aria-label="Editar">✏️</button>
@@ -872,7 +920,19 @@ function renderMovs(M) {
 /* ---------- Top 5 gastos ---------- */
 function renderTop(M) {
   const box = $('#topSpends');
-  const top = [...M.gastos].sort((a, b) => b.monto - a.monto).slice(0, 5);
+  // Debt payments are grouped into a single entry (consistent with the river)
+  const deudaPagos = M.gastos.filter(g => g.cat === 'deudapago');
+  const items = M.gastos.filter(g => g.cat !== 'deudapago').map(g => ({ ...g }));
+  if (deudaPagos.length > 0) {
+    const totDeuda = deudaPagos.reduce((s, g) => s + g.monto, 0);
+    items.push({
+      cat: 'deudapago',
+      monto: totDeuda,
+      desc: deudaPagos.length > 1 ? `Pagos de deudas (${deudaPagos.length} pagos)` : (deudaPagos[0].desc || 'Pago de deudas'),
+      grouped: deudaPagos.length > 1
+    });
+  }
+  const top = items.sort((a, b) => b.monto - a.monto).slice(0, 5);
   if (top.length === 0) {
     box.innerHTML = `<div class="empty"><span class="big-ico">🔝</span>Aquí aparecerán tus gastos más grandes del mes.</div>`;
     return;
@@ -883,7 +943,7 @@ function renderTop(M) {
       <div class="emoji">${['🥇','🥈','🥉','4️⃣','5️⃣'][i]}</div>
       <div class="info">
         <div class="t">${m.desc || c.name}</div>
-        <div class="d">${c.emoji} ${c.name}</div>
+        <div class="d">${c.emoji} ${c.name}${m.grouped ? ' · todas tus cuotas sumadas' : ''}</div>
       </div>
       <div class="amt out">${fmt(m.monto)}</div>
     </div>`;
@@ -899,17 +959,18 @@ function periodDefaultDate() {
 function renderFixed(M) {
   const box = $('#fixedList');
   if (data.fixed.length === 0) {
-    box.innerHTML = `<div class="empty"><span class="big-ico">⚡</span>Guarda aquí tus gastos que se repiten (arriendo, servicios, cuotas…) y regístralos con un solo toque cada periodo.</div>`;
+    box.innerHTML = `<div class="empty"><span class="big-ico">⚡</span>Guarda aquí lo que se repite cada periodo (arriendo, servicios, cuotas… ¡y tu ahorro!) y regístralo con un solo toque.</div>`;
     return;
   }
   box.innerHTML = data.fixed.map(t => {
     const c = catById(t.cat);
     const applied = M.movs.some(m => m.fixedId === t.id);
+    const linked = t.debtId ? data.debts.find(d => d.id === t.debtId) : null;
     return `<div class="item">
       <div class="emoji">${c.emoji}</div>
       <div class="info">
         <div class="t">${t.nombre}</div>
-        <div class="d">${c.name} · suele ser ${fmt(t.monto)}</div>
+        <div class="d">${c.name} · suele ser ${fmt(t.monto)}${linked ? ` · 🔗 baja saldo de "${linked.nombre}"${t.nomina ? ' (nómina)' : ''}` : ''}</div>
       </div>
       ${applied
         ? `<span style="font-size:12px;font-weight:700;color:var(--green)">✓ Registrado</span>`
@@ -920,24 +981,49 @@ function renderFixed(M) {
   }).join('');
 }
 
-let editingFixedId = null, fixCat = 'vivienda';
+let editingFixedId = null, fixTipo = 'gasto', fixCat = 'vivienda', fixDebtSel = '';
 function renderFixChips() {
-  $('#fixChips').innerHTML = CATS_GASTO.map(c =>
+  const cats = fixTipo === 'gasto' ? CATS_GASTO : CATS_AHORRO;
+  if (!cats.some(c => c.id === fixCat)) fixCat = cats[0].id;
+  $('#fixChips').innerHTML = cats.map(c =>
     `<button class="chip ${c.id === fixCat ? 'on' : ''}" data-fixcat="${c.id}">${c.emoji} ${c.name}</button>`
   ).join('');
+  updateFixDebtField();
 }
+function updateFixDebtField() {
+  const show = fixTipo === 'gasto' && fixCat === 'deudapago' && data.debts.length > 0;
+  $('#fixDebtField').style.display = show ? 'block' : 'none';
+  if (show) {
+    $('#fixDebt').innerHTML =
+      `<option value="">No vincular a una deuda</option>` +
+      data.debts.map(d =>
+        `<option value="${d.id}" ${fixDebtSel === d.id ? 'selected' : ''}>${d.nombre} (debes ${fmt(d.saldo)})</option>`
+      ).join('');
+  }
+}
+function setFixTipo(t) {
+  fixTipo = t;
+  $('#ftGasto').classList.toggle('on', t === 'gasto');
+  $('#ftAhorro').classList.toggle('on', t === 'ahorro');
+  renderFixChips();
+}
+$('#ftGasto').addEventListener('click', () => setFixTipo('gasto'));
+$('#ftAhorro').addEventListener('click', () => setFixTipo('ahorro'));
+$('#fixDebt').addEventListener('change', e => { fixDebtSel = e.target.value; });
 $('#fixChips').addEventListener('click', e => {
   const b = e.target.closest('[data-fixcat]');
   if (b) { fixCat = b.dataset.fixcat; renderFixChips(); }
 });
 function openFixed(t) {
   editingFixedId = t ? t.id : null;
-  $('#fixTitle').textContent = t ? 'Editar gasto fijo' : 'Agregar gasto fijo';
+  $('#fixTitle').textContent = t ? 'Editar fijo' : 'Agregar un fijo';
   $('#fName').value = t ? t.nombre : '';
   $('#fAmt').value = t ? String(t.monto) : '';
   $('#fAmtPrev').textContent = t ? '= ' + fmt(t.monto) + ' pesos' : '';
   fixCat = t ? t.cat : 'vivienda';
-  renderFixChips();
+  fixDebtSel = t && t.debtId ? t.debtId : '';
+  $('#fixNomina').checked = !!(t && t.nomina);
+  setFixTipo(t && t.tipo ? t.tipo : 'gasto');
   $('#fixOverlay').classList.add('open');
 }
 $('#addFixedBtn').addEventListener('click', () => openFixed(null));
@@ -946,11 +1032,13 @@ $('#fixSave').addEventListener('click', () => {
   const nombre = $('#fName').value.trim();
   const monto = numVal('#fAmt');
   if (!nombre || !monto) { $('#fAmtPrev').textContent = '⚠️ Falta el nombre o el monto'; return; }
+  const debtId = (fixTipo === 'gasto' && fixCat === 'deudapago' && fixDebtSel) ? fixDebtSel : null;
+  const nomina = !!(debtId && $('#fixNomina').checked);
   if (editingFixedId) {
     const i = data.fixed.findIndex(t => t.id === editingFixedId);
-    if (i > -1) data.fixed[i] = { ...data.fixed[i], nombre, monto, cat: fixCat };
+    if (i > -1) data.fixed[i] = { ...data.fixed[i], nombre, monto, tipo: fixTipo, cat: fixCat, debtId, nomina };
   } else {
-    data.fixed.push({ id: uid(), nombre, monto, cat: fixCat });
+    data.fixed.push({ id: uid(), nombre, monto, tipo: fixTipo, cat: fixCat, debtId, nomina });
   }
   save();
   editingFixedId = null;
@@ -960,16 +1048,38 @@ $('#fixSave').addEventListener('click', () => {
 $('#fixApplyAll').addEventListener('click', () => {
   const M = monthData();
   const pending = data.fixed.filter(t => !M.movs.some(m => m.fixedId === t.id));
-  if (pending.length === 0) { alert('Todos tus gastos fijos ya están registrados en este periodo. ✓'); return; }
+  if (pending.length === 0) { alert('Todos tus fijos ya están registrados en este periodo. ✓'); return; }
   const tot = pending.reduce((s, t) => s + t.monto, 0);
-  if (!confirm(`Se registrarán ${pending.length} gastos fijos por un total de ${fmt(tot)} en ${PW()}. Después puedes editar (✏️) cualquiera si el monto fue distinto. ¿Continuar?`)) return;
-  const fecha = periodDefaultDate();
+  $('#applySummary').textContent =
+    `Se registrarán ${pending.length} fijos por un total de ${fmt(tot)}: ` +
+    pending.map(t => t.nombre).join(', ') +
+    '. Después puedes editar (✏️) cualquiera si el monto fue distinto.';
+  $('#applyDate').value = periodDefaultDate();
+  $('#applyOverlay').classList.add('open');
+});
+$('#applyCancel').addEventListener('click', () => $('#applyOverlay').classList.remove('open'));
+$('#applyConfirm').addEventListener('click', () => {
+  const fecha = $('#applyDate').value || periodDefaultDate();
+  // Recompute pending against the chosen date's period (month of that date)
+  const ym = fecha.slice(0, 7);
+  const pending = data.fixed.filter(t =>
+    !data.movs.some(m => m.fixedId === t.id && m.fecha.slice(0, 7) === ym &&
+      (parseInt(m.fecha.slice(8, 10), 10) <= 15) === (parseInt(fecha.slice(8, 10), 10) <= 15)));
   pending.forEach(t => {
-    const payload = { id: uid(), tipo: 'gasto', cat: t.cat, monto: t.monto, desc: t.nombre, fecha, fixedId: t.id };
-    if (t.cat === 'deudapago' && t.debtId) { payload.debtId = t.debtId; applyDebtDelta(t.debtId, -t.monto); }
+    const tipo = t.tipo || 'gasto';
+    const payload = { id: uid(), tipo, cat: t.cat, monto: t.monto, desc: t.nombre, fecha, fixedId: t.id };
+    if (tipo === 'gasto' && t.cat === 'deudapago' && t.debtId) {
+      payload.debtId = t.debtId;
+      payload.nomina = !!t.nomina;
+      applyDebtDelta(t.debtId, -t.monto);
+    }
     data.movs.push(payload);
   });
   save();
+  // Jump to the period where the movements landed
+  currentMonth = ym;
+  if (currentQ !== 'all') currentQ = parseInt(fecha.slice(8, 10), 10) <= 15 ? 'q1' : 'q2';
+  $('#applyOverlay').classList.remove('open');
   render();
 });
 
@@ -1027,6 +1137,8 @@ function goTo(view) {
     s.classList.toggle('active', s.dataset.view === view));
   document.querySelectorAll('.tab').forEach(t =>
     t.classList.toggle('active', t.dataset.goto === view));
+  document.querySelectorAll('.desktop-nav [data-goto]').forEach(b =>
+    b.classList.toggle('on', b.dataset.goto === view));
 }
 document.querySelectorAll('[data-goto]').forEach(b =>
   b.addEventListener('click', () => goTo(b.dataset.goto)));
@@ -1104,6 +1216,7 @@ function openMov(mov, preset) {
   const src = mov || preset || {};
   movCat = src.cat || 'comida';
   movDebtSel = src.debtId || '';
+  $('#movNomina').checked = !!src.nomina;
   $('#movAmt').value = src.monto ? String(src.monto) : '';
   $('#movAmtPrev').textContent = src.monto ? '= ' + fmt(src.monto) + ' pesos' : '';
   $('#movDesc').value = src.desc || '';
@@ -1118,7 +1231,8 @@ $('#movSave').addEventListener('click', () => {
   if (!monto) { $('#movAmt').focus(); $('#movAmtPrev').textContent = '⚠️ Escribe cuánto fue'; return; }
   const fecha = $('#movDate').value || new Date().toISOString().slice(0, 10);
   const linkDebt = (movTipo === 'gasto' && movCat === 'deudapago' && movDebtSel) ? movDebtSel : null;
-  const payload = { tipo: movTipo, cat: movCat, monto, desc: $('#movDesc').value.trim(), fecha, debtId: linkDebt, fixedId: pendingFixedId };
+  const nomina = !!(linkDebt && $('#movNomina').checked);
+  const payload = { tipo: movTipo, cat: movCat, monto, desc: $('#movDesc').value.trim(), fecha, debtId: linkDebt, nomina, fixedId: pendingFixedId };
   if (editingMovId) {
     const i = data.movs.findIndex(m => m.id === editingMovId);
     if (i > -1) {
@@ -1179,7 +1293,7 @@ document.body.addEventListener('click', e => {
   const af = e.target.closest('[data-applyfix]');
   if (af) {
     const t = data.fixed.find(x => x.id === af.dataset.applyfix);
-    if (t) openMov(null, { tipo:'gasto', cat:t.cat, monto:t.monto, desc:t.nombre, fixedId:t.id });
+    if (t) openMov(null, { tipo:t.tipo || 'gasto', cat:t.cat, monto:t.monto, desc:t.nombre, fixedId:t.id, debtId:t.debtId || '', nomina:!!t.nomina });
     return;
   }
   const ef = e.target.closest('[data-editfix]');
@@ -1224,7 +1338,7 @@ document.body.addEventListener('click', e => {
 });
 
 /* Close modals tapping outside */
-['movOverlay', 'debtOverlay', 'fixOverlay'].forEach(id => {
+['movOverlay', 'debtOverlay', 'fixOverlay', 'applyOverlay'].forEach(id => {
   $('#' + id).addEventListener('click', e => {
     if (e.target.id === id) $('#' + id).classList.remove('open');
   });
@@ -1263,9 +1377,10 @@ $('#demoBtn').addEventListener('click', () => {
       { id:uid(), nombre:'Préstamo personal', saldo:400000, cuota:100000, tasa:null }
     ],
     fixed: [
-      { id:fixArriendo,  nombre:'Arriendo',              monto:850000, cat:'vivienda' },
-      { id:fixServicios, nombre:'Luz, agua e internet',  monto:180000, cat:'servicios' },
-      { id:fixCuota,     nombre:'Cuota tarjeta',         monto:220000, cat:'deudapago', debtId:tcId }
+      { id:fixArriendo,  nombre:'Arriendo',              monto:850000, tipo:'gasto', cat:'vivienda' },
+      { id:fixServicios, nombre:'Luz, agua e internet',  monto:180000, tipo:'gasto', cat:'servicios' },
+      { id:fixCuota,     nombre:'Cuota tarjeta',         monto:220000, tipo:'gasto', cat:'deudapago', debtId:tcId },
+      { id:uid(),        nombre:'Ahorro quincenal',      monto:100000, tipo:'ahorro', cat:'ahorrogen' }
     ],
     prios: ['deudas', 'ahorro']
   };
