@@ -32,7 +32,8 @@
     background:var(--bg);
     color:var(--ink);
     min-height:100vh;
-    padding-bottom:calc(84px + env(safe-area-inset-bottom));
+    min-height:100dvh;
+    padding-bottom:calc(96px + env(safe-area-inset-bottom));
     font-size:16px;
     line-height:1.45;
   }
@@ -215,7 +216,9 @@
     background:var(--surface);border-top:1px solid var(--line);
     display:flex;justify-content:space-around;
     padding:8px 8px calc(8px + env(safe-area-inset-bottom));
+    transition:transform .25s ease;
   }
+  .tabbar.hide{transform:translateY(110%)}
   .tab{
     flex:1;border:none;background:none;font-family:var(--font);cursor:pointer;
     display:flex;flex-direction:column;align-items:center;gap:2px;
@@ -1400,6 +1403,21 @@ $('#wipeBtn').addEventListener('click', () => {
 });
 
 /* ---------- Init ---------- */
+// Auto-hide bottom tab bar: hide when scrolling down (free up reading space),
+// show again when scrolling up or reaching the bottom of the page
+(() => {
+  const bar = document.querySelector('.tabbar');
+  if (!bar) return;
+  let lastY = window.scrollY;
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY;
+    const atBottom = window.innerHeight + y >= document.body.scrollHeight - 40;
+    if (atBottom || y < 60 || y < lastY - 6) bar.classList.remove('hide');
+    else if (y > lastY + 6) bar.classList.add('hide');
+    lastY = y;
+  }, { passive: true });
+})();
+
 // If this line runs, JavaScript works: hide the "no JS" warning banner
 const jsWarn = document.getElementById('jsWarn');
 if (jsWarn) jsWarn.remove();
