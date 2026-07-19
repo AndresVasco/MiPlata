@@ -1411,8 +1411,7 @@ $('#wipeBtn').addEventListener('click', () => {
   let lastY = window.scrollY;
   window.addEventListener('scroll', () => {
     const y = window.scrollY;
-    const atBottom = window.innerHeight + y >= document.body.scrollHeight - 40;
-    if (atBottom || y < 60 || y < lastY - 6) bar.classList.remove('hide');
+    if (y < 60 || y < lastY - 6) bar.classList.remove('hide');
     else if (y > lastY + 6) bar.classList.add('hide');
     lastY = y;
   }, { passive: true });
