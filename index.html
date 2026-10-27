@@ -270,7 +270,6 @@
   .sheet .actions{display:flex;gap:10px;margin-top:18px}
   .sheet .actions .btn{flex:1}
 
-  .footer-tools{display:flex;justify-content:center;gap:6px;margin:6px 0 18px;grid-column:1 / -1}
 
   @media(prefers-reduced-motion:reduce){
     *{transition:none!important;animation:none!important}
@@ -289,11 +288,19 @@
       <div class="logo">💰</div>
       <div>
         <h1>Mi Plata</h1>
-        <small>Tu dinero, claro y simple · v3.6</small>
+        <small>Tu dinero, claro y simple · v3.7</small>
       </div>
     </div>
-    <select id="monthPick" class="month-pick" aria-label="Elegir mes"></select>
+    <div style="display:flex;gap:8px;align-items:center">
+      <select id="monthPick" class="month-pick" aria-label="Elegir mes"></select>
+      <button class="month-pick" id="settingsBtn" aria-label="Ajustes" style="cursor:pointer">⚙️</button>
+    </div>
   </header>
+
+  <div id="demoBanner" style="display:none;grid-column:1 / -1;background:var(--amber-soft);border-radius:14px;padding:12px 14px;margin-bottom:14px;font-size:14px;align-items:center;gap:10px">
+    <span style="flex:1">✨ <b>Estás viendo datos de ejemplo.</b> Nada de lo que hagas aquí se guarda y tus datos reales siguen intactos.</span>
+    <button class="btn primary small" id="demoExit">Salir del ejemplo</button>
+  </div>
 
   <div class="period-seg" id="periodSeg" role="tablist" aria-label="Elegir periodo">
     <button data-q="q1" title="Se financia con la plata que llega el 30/31">1ª quincena (30→14)</button>
@@ -384,12 +391,6 @@
     </div>
   </div>
 
-  <div class="footer-tools">
-    <button class="btn ghost" id="linkBtn">📲 Conectar mi WhatsApp</button>
-    <button class="btn ghost" id="demoBtn">✨ Cargar datos de ejemplo</button>
-    <button class="btn ghost" id="wipeBtn">🗑️ Borrar todo</button>
-  </div>
-  <div id="syncStatus" style="grid-column:1 / -1;text-align:center;font-size:12px;color:var(--muted);margin:-6px 0 18px"></div>
 </div>
 
 <button class="fab" id="fab" aria-label="Agregar movimiento">＋</button>
@@ -526,25 +527,21 @@
   </div>
 </div>
 
-<!-- ============ MODAL: CONECTAR WHATSAPP ============ -->
-<div class="overlay" id="linkOverlay">
+
+
+<!-- ============ MODAL: AJUSTES ============ -->
+<div class="overlay" id="setOverlay">
   <div class="sheet">
-    <h3>📲 Conectar mi WhatsApp</h3>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">
-      La forma fácil: toca el <b>link que el bot te envía</b> por WhatsApp — se conecta solo.
-      También puedes escribirle la palabra <b>vincular</b> al bot y pegar aquí tu código personal.
-      🔒 Tu código es privado: no lo compartas.
-    </p>
-    <div class="field">
-      <label>Tu código personal (el que te dio el bot)</label>
-      <input type="text" id="lnkKey" placeholder="Código de 20 caracteres" autocomplete="off" autocapitalize="none">
+    <h3>⚙️ Ajustes</h3>
+    <button class="btn soft full" id="demoBtn">✨ Ver cómo funciona con datos de ejemplo</button>
+    <p style="font-size:13px;color:var(--muted);margin:8px 0 20px">Es solo para mirar: tus datos reales no se tocan y vuelves a ellos cuando salgas del ejemplo.</p>
+    <div style="border-top:1px solid var(--line);padding-top:16px">
+      <p style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:8px">Zona de cuidado</p>
+      <button class="btn danger full" id="wipeBtn">🗑️ Borrar toda mi información</button>
     </div>
-    <div class="money-preview" id="lnkMsg"></div>
     <div class="actions">
-      <button class="btn soft" id="lnkCancel">Cancelar</button>
-      <button class="btn primary" id="lnkSave">Conectar</button>
+      <button class="btn soft" id="setClose">Cerrar</button>
     </div>
-    <button class="btn danger full" id="lnkDisconnect" style="margin-top:10px;display:none">Desconectar WhatsApp</button>
   </div>
 </div>
 
@@ -575,6 +572,10 @@ const store = (() => {
       const raw = JSON.stringify(val);
       if (ok) { try { window.localStorage.setItem(key, raw); } catch (e) {} }
       mem[key] = raw;
+    },
+    remove(key) {
+      if (ok) { try { window.localStorage.removeItem(key); } catch (e) {} }
+      delete mem[key];
     },
     clear() {
       if (ok) { try { window.localStorage.removeItem('miplata_data'); } catch (e) {} }
@@ -614,11 +615,21 @@ const catById = id =>
   { id, name:id, emoji:'📦', color:'#7B8B89', kind:'gusto' };
 
 /* ---------- State ---------- */
+// Local calendar date (YYYY-MM-DD). toISOString() is UTC, which in Colombia
+// turns any time after 7 p.m. into "tomorrow".
+const today = () => {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+};
 let data = store.get('miplata_data', { movs: [], debts: [], prios: [], fixed: [] });
 if (!data.prios) data.prios = [];
 if (!data.fixed) data.fixed = [];
-if (!data.waIgnored) data.waIgnored = [];
-const _todayPeriod = finPeriod(new Date().toISOString().slice(0, 10));
+delete data.waIgnored;
+// WhatsApp integration was removed: drop its leftover keys
+store.remove('miplata_link');
+store.remove('miplata_wa_cutoff');
+let demoMode = false, realData = null; // demo works on a throwaway copy
+const _todayPeriod = finPeriod(today());
 let currentMonth = _todayPeriod.ym;
 let currentQ = _todayPeriod.q; // 'q1' | 'q2' | 'all'
 let currentView = 'resumen';
@@ -628,7 +639,9 @@ let editingDebtId = null;
 const $ = s => document.querySelector(s);
 const fmt = n => '$' + Math.round(n).toLocaleString('es-CO');
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-const save = () => store.set('miplata_data', data);
+const save = () => { if (!demoMode) store.set('miplata_data', data); };
+const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, ch =>
+  ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[ch]);
 
 /* ---------- Month helpers ---------- */
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
@@ -638,7 +651,7 @@ function monthLabel(ym) {
 }
 function buildMonthPicker() {
   const set = new Set(data.movs.map(m => finPeriod(m.fecha).ym));
-  set.add(new Date().toISOString().slice(0, 7));
+  set.add(today().slice(0, 7));
   const months = [...set].sort().reverse();
   if (!months.includes(currentMonth)) currentMonth = months[0];
   $('#monthPick').innerHTML = months
@@ -694,7 +707,17 @@ function monthData() {
     cats };
 }
 const totalDebt = () => data.debts.reduce((s, d) => s + d.saldo, 0);
-const totalDebtPay = () => data.debts.reduce((s, d) => s + (d.cuota || 0), 0);
+// Only debts still owed: a paid-off debt has no cuota left to pay
+const totalDebtPay = () => data.debts.filter(d => d.saldo > 0).reduce((s, d) => s + (d.cuota || 0), 0);
+// Months to pay off with interest (annuity formula). Infinity = the cuota
+// doesn't even cover the monthly interest, so the balance never goes down.
+function payoffMonths(d) {
+  if (!(d.cuota > 0) || !(d.saldo > 0)) return null;
+  const r = (d.tasa || 0) / 100;
+  if (r <= 0) return Math.ceil(d.saldo / d.cuota);
+  if (d.saldo * r >= d.cuota) return Infinity;
+  return Math.ceil(-Math.log(1 - r * d.saldo / d.cuota) / Math.log(1 + r));
+}
 function applyDebtDelta(debtId, delta) {
   const d = data.debts.find(x => x.id === debtId);
   if (d) d.saldo = Math.max(0, d.saldo + delta);
@@ -778,13 +801,13 @@ function renderRiver(M) {
     return;
   }
   const segs = M.cats.map(c =>
-    `<div class="seg" style="width:${(c.amt / M.totOut) * 100}%;background:${c.color}" title="${c.name}: ${fmt(c.amt)}"></div>`
+    `<div class="seg" style="width:${(c.amt / M.totOut) * 100}%;background:${c.color}" title="${esc(c.name)}: ${fmt(c.amt)}"></div>`
   ).join('');
   const legend = M.cats.map(c => {
     const p = Math.round((c.amt / M.totOut) * 100);
     return `<div class="row">
       <span class="dot" style="background:${c.color}"></span>
-      <span class="name">${c.emoji} ${c.name}</span>
+      <span class="name">${c.emoji} ${esc(c.name)}</span>
       <span class="amt">${fmt(c.amt)}</span>
       <span class="pct">${p}%</span>
     </div>`;
@@ -808,7 +831,7 @@ function renderInsights(M) {
     const top = M.cats[0];
     const pctIn = M.totIn > 0 ? Math.round((top.amt / M.totIn) * 100) : null;
     add(pctIn !== null && pctIn > 35 ? 'warn' : 'info', top.emoji,
-      `Tu gasto más grande es <b>${top.name}</b>: ${fmt(top.amt)}` +
+      `Tu gasto más grande es <b>${esc(top.name)}</b>: ${fmt(top.amt)}` +
       (pctIn !== null ? `, o sea el <b>${pctIn}%</b> de lo que te entró.` : '.'));
   }
 
@@ -817,7 +840,7 @@ function renderInsights(M) {
   if (biggest) {
     const c = catById(biggest.cat);
     add('info', '🔎',
-      `El movimiento más caro de ${PW()} fue <b>${biggest.desc || c.name}</b> por <b>${fmt(biggest.monto)}</b> el ${biggest.fecha.slice(8,10)}/${biggest.fecha.slice(5,7)}.`);
+      `El movimiento más caro de ${PW()} fue <b>${esc(biggest.desc || c.name)}</b> por <b>${fmt(biggest.monto)}</b> el ${biggest.fecha.slice(8,10)}/${biggest.fecha.slice(5,7)}.`);
   }
 
   // 2b. Descuentos de nómina: explicar el ajuste
@@ -840,7 +863,7 @@ function renderInsights(M) {
   const topFreq = Object.entries(freq).sort((a, b) => b[1] - a[1])[0];
   if (topFreq && topFreq[1] >= 4) {
     const c = catById(topFreq[0]);
-    add('info', '🔁', `Donde más veces sacas la billetera es en <b>${c.name}</b>: ${topFreq[1]} veces ${PW()}. Muchos gastos pequeños repetidos también pesan.`);
+    add('info', '🔁', `Donde más veces sacas la billetera es en <b>${esc(c.name)}</b>: ${topFreq[1]} veces ${PW()}. Muchos gastos pequeños repetidos también pesan.`);
   }
 
   // 5. Deudas vs ingreso mensual completo (las cuotas son mensuales)
@@ -900,7 +923,7 @@ function renderPrio(M) {
         add('good', '💳', `<b>Salir de deudas:</b> no tienes deudas registradas. Si en verdad no tienes, ¡vas ganando! Si tienes alguna, anótala en la pestaña Deudas para armar un plan.`);
       } else {
         const worst = [...data.debts].sort((a, b) => (b.tasa || 0) - (a.tasa || 0) || b.saldo - a.saldo)[0];
-        add('info', '💳', `<b>Salir de deudas:</b> paga el mínimo de todas, pero cualquier plata extra mándala a <b>${worst.nombre}</b>${worst.tasa ? ` (cobra ${worst.tasa}% mensual, la más costosa)` : ' (la de mayor saldo)'}. Así pagas menos intereses en total.`);
+        add('info', '💳', `<b>Salir de deudas:</b> paga el mínimo de todas, pero cualquier plata extra mándala a <b>${esc(worst.nombre)}</b>${worst.tasa ? ` (cobra ${worst.tasa}% mensual, la más costosa)` : ' (la de mayor saldo)'}. Así pagas menos intereses en total.`);
         add('warn', '⚠️', `Evita hacer nuevas compras a cuotas mientras pagas lo que ya debes. Cada abono extra a capital acorta la deuda más de lo que parece.`);
       }
     }
@@ -920,7 +943,7 @@ function renderPrio(M) {
     }
     if (id === 'fijos') {
       const fijo = M.cats.find(c => ['vivienda', 'servicios', 'transporte'].includes(c.id));
-      add('info', '🏠', `<b>Bajar gastos fijos:</b>${fijo ? ` tu fijo más pesado ahora es <b>${fijo.name}</b> (${fmt(fijo.amt)}).` : ''} Revisa una vez al año tu plan de celular e internet, y pregunta por planes más baratos: casi siempre hay uno. Las suscripciones que no usas también cuentan.`);
+      add('info', '🏠', `<b>Bajar gastos fijos:</b>${fijo ? ` tu fijo más pesado ahora es <b>${esc(fijo.name)}</b> (${fmt(fijo.amt)}).` : ''} Revisa una vez al año tu plan de celular e internet, y pregunta por planes más baratos: casi siempre hay uno. Las suscripciones que no usas también cuentan.`);
     }
     if (id === 'ingresos') {
       add('info', '🚀', `<b>Aumentar ingresos:</b> registra aquí <b>todo</b> ingreso extra, por pequeño que sea (ventas, encargos, trabajos sueltos). Verlos crecer motiva, y te muestra cuál actividad extra te deja más plata por hora.`);
@@ -947,8 +970,8 @@ function renderMovs(M) {
     return `<div class="item">
       <div class="emoji">${c.emoji}</div>
       <div class="info">
-        <div class="t">${m.desc || c.name}</div>
-        <div class="d">${c.name} · ${m.fecha.slice(8,10)}/${m.fecha.slice(5,7)}${m.nomina ? ' · 🏢 descontado de nómina' : ''}${m.wa ? ' · 📲 WhatsApp' : ''}</div>
+        <div class="t">${esc(m.desc || c.name)}</div>
+        <div class="d">${esc(c.name)} · ${m.fecha.slice(8,10)}/${m.fecha.slice(5,7)}${m.nomina ? ' · 🏢 descontado de nómina' : ''}</div>
       </div>
       <div class="amt ${cls}">${sign}${fmt(m.monto)}</div>
       <button class="edit" data-editmov="${m.id}" aria-label="Editar">✏️</button>
@@ -982,8 +1005,8 @@ function renderTop(M) {
     return `<div class="item">
       <div class="emoji">${['🥇','🥈','🥉','4️⃣','5️⃣'][i]}</div>
       <div class="info">
-        <div class="t">${m.desc || c.name}</div>
-        <div class="d">${c.emoji} ${c.name}${m.grouped ? ' · todas tus cuotas sumadas' : ''}</div>
+        <div class="t">${esc(m.desc || c.name)}</div>
+        <div class="d">${c.emoji} ${esc(c.name)}${m.grouped ? ' · todas tus cuotas sumadas' : ''}</div>
       </div>
       <div class="amt out">${fmt(m.monto)}</div>
     </div>`;
@@ -992,8 +1015,8 @@ function renderTop(M) {
 
 /* ---------- Gastos fijos (plantillas reutilizables) ---------- */
 function periodDefaultDate() {
-  const today = new Date().toISOString().slice(0, 10);
-  if (inPeriod(today)) return today;
+  const t = today();
+  if (inPeriod(t)) return t;
   return currentMonth + (currentQ === 'q2' ? '-16' : '-01');
 }
 function renderFixed(M) {
@@ -1009,8 +1032,8 @@ function renderFixed(M) {
     return `<div class="item">
       <div class="emoji">${c.emoji}</div>
       <div class="info">
-        <div class="t">${t.nombre}</div>
-        <div class="d">${c.name} · suele ser ${fmt(t.monto)}${linked ? ` · 🔗 baja saldo de "${linked.nombre}"${t.nomina ? ' (nómina)' : ''}` : ''}</div>
+        <div class="t">${esc(t.nombre)}</div>
+        <div class="d">${esc(c.name)} · suele ser ${fmt(t.monto)}${linked ? ` · 🔗 baja saldo de "${esc(linked.nombre)}"${t.nomina ? ' (nómina)' : ''}` : ''}</div>
       </div>
       ${applied
         ? `<span style="font-size:12px;font-weight:700;color:var(--green)">✓ Registrado</span>`
@@ -1031,14 +1054,14 @@ function renderFixChips() {
   updateFixDebtField();
 }
 function updateFixDebtField() {
-  const localDebts = data.debts.filter(d => !d.wa); // cloud debts are paid via the bot
+  const localDebts = data.debts;
   const show = fixTipo === 'gasto' && fixCat === 'deudapago' && localDebts.length > 0;
   $('#fixDebtField').style.display = show ? 'block' : 'none';
   if (show) {
     $('#fixDebt').innerHTML =
       `<option value="">No vincular a una deuda</option>` +
       localDebts.map(d =>
-        `<option value="${d.id}" ${fixDebtSel === d.id ? 'selected' : ''}>${d.nombre} (debes ${fmt(d.saldo)})</option>`
+        `<option value="${d.id}" ${fixDebtSel === d.id ? 'selected' : ''}>${esc(d.nombre)} (debes ${fmt(d.saldo)})</option>`
       ).join('');
   }
 }
@@ -1147,14 +1170,14 @@ function renderDebts(M) {
     <div class="cuota">Pagas ~${fmt(pay)} al mes en cuotas${pct !== null ? ` — el ${pct}% de tus ingresos del mes` : ''}.${paidMonth > 0 ? ` Este mes ya has abonado ${fmt(paidMonth)}. 💪` : ''}</div>
   </div>`;
   list.innerHTML = data.debts.map(d => {
-    const months = d.cuota > 0 && d.saldo > 0 ? Math.ceil(d.saldo / d.cuota) : null;
+    const months = payoffMonths(d);
     const paid = data.movs
       .filter(m => m.debtId === d.id && finPeriod(m.fecha).ym === currentMonth)
       .reduce((s, m) => s + m.monto, 0);
     return `<div class="debt-card">
-      <div class="head"><span class="n">💳 ${d.nombre}${d.wa ? ' <span style="font-size:12px;color:var(--muted)">📲 WhatsApp</span>' : ''}</span>
+      <div class="head"><span class="n">💳 ${esc(d.nombre)}</span>
         <span>
-          ${d.wa ? '' : `<button class="edit" data-editdebt="${d.id}" aria-label="Editar">✏️</button>`}
+          <button class="edit" data-editdebt="${d.id}" aria-label="Editar">✏️</button>
           <button class="del" data-deldebt="${d.id}" aria-label="Eliminar">✕</button>
         </span></div>
       <div class="meta">
@@ -1164,7 +1187,9 @@ function renderDebts(M) {
         <span>Cuota aprox.: <b>${fmt(d.cuota || 0)}/mes</b></span>`}
         ${paid > 0 ? `<span>Abonaste este mes: <b style="color:var(--green)">${fmt(paid)}</b></span>` : ''}
         ${d.tasa && d.saldo > 0 ? `<span>Interés: <b>${d.tasa}% mensual</b></span>` : ''}
-        ${months ? `<span>A este ritmo: <b>~${months} meses</b>${d.tasa ? ' (sin contar intereses)' : ''}</span>` : ''}
+        ${months === Infinity
+          ? `<span style="color:var(--red);font-weight:600">⚠️ Con esta cuota la deuda no baja: los intereses (~${fmt(d.saldo * d.tasa / 100)} al mes) se comen todo el pago. Si puedes, abona más.</span>`
+          : months ? `<span>A este ritmo: <b>~${months} meses</b>${d.tasa ? ' (ya con intereses)' : ' (si cobra intereses, serán más)'}</span>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -1227,14 +1252,14 @@ function renderChips() {
   updateDebtField();
 }
 function updateDebtField() {
-  const localDebts = data.debts.filter(d => !d.wa); // cloud debts are paid via the bot
+  const localDebts = data.debts;
   const show = movTipo === 'gasto' && movCat === 'deudapago' && localDebts.length > 0;
   $('#movDebtField').style.display = show ? 'block' : 'none';
   if (show) {
     $('#movDebt').innerHTML =
       `<option value="">No está en mi lista / prefiero no vincularlo</option>` +
       localDebts.map(d =>
-        `<option value="${d.id}" ${movDebtSel === d.id ? 'selected' : ''}>${d.nombre} (debes ${fmt(d.saldo)})</option>`
+        `<option value="${d.id}" ${movDebtSel === d.id ? 'selected' : ''}>${esc(d.nombre)} (debes ${fmt(d.saldo)})</option>`
       ).join('');
   }
 }
@@ -1274,7 +1299,7 @@ $('#movCancel').addEventListener('click', () => $('#movOverlay').classList.remov
 $('#movSave').addEventListener('click', () => {
   const monto = numVal('#movAmt');
   if (!monto) { $('#movAmt').focus(); $('#movAmtPrev').textContent = '⚠️ Escribe cuánto fue'; return; }
-  const fecha = $('#movDate').value || new Date().toISOString().slice(0, 10);
+  const fecha = $('#movDate').value || today();
   const linkDebt = (movTipo === 'gasto' && movCat === 'deudapago' && movDebtSel) ? movDebtSel : null;
   const nomina = !!(linkDebt && $('#movNomina').checked);
   const payload = { tipo: movTipo, cat: movCat, monto, desc: $('#movDesc').value.trim(), fecha, debtId: linkDebt, nomina, fixedId: pendingFixedId };
@@ -1369,36 +1394,48 @@ document.body.addEventListener('click', e => {
   const dm = e.target.closest('[data-delmov]');
   if (dm) {
     const mov = data.movs.find(m => m.id === dm.dataset.delmov);
-    const extra = mov && mov.debtId && !mov.wa ? '\n\nEste era un pago de deuda: el saldo de esa deuda volverá a subir.' : '';
+    const extra = mov && mov.debtId ? '\n\nEste era un pago de deuda: el saldo de esa deuda volverá a subir.' : '';
     if (!confirm('¿Eliminar este movimiento? Solo se borra este, lo demás queda intacto.' + extra)) return;
-    // Local payments restore the balance; WhatsApp payments don't (the cloud balance is authoritative)
-    if (mov && mov.debtId && !mov.wa) applyDebtDelta(mov.debtId, +mov.monto);
-    if (mov && mov.wa) data.waIgnored.push(mov.id); // don't resurrect on next sync
+    if (mov && mov.debtId) applyDebtDelta(mov.debtId, +mov.monto);
     data.movs = data.movs.filter(m => m.id !== dm.dataset.delmov);
     save(); render(); return;
   }
   const dd = e.target.closest('[data-deldebt]');
   if (dd) {
-    const debt = data.debts.find(d => d.id === dd.dataset.deldebt);
-    const waNote = debt && debt.wa ? '\n\nEsta deuda vive en tu WhatsApp: aquí se ocultará, pero seguirá activa en el bot.' : '';
-    if (!confirm('¿Eliminar esta deuda? Solo se borra esta, lo demás queda intacto.' + waNote)) return;
-    if (debt && debt.wa) data.waIgnored.push(debt.id); // don't resurrect on next sync
+    if (!confirm('¿Eliminar esta deuda? Solo se borra esta, lo demás queda intacto.')) return;
     data.debts = data.debts.filter(d => d.id !== dd.dataset.deldebt);
     save(); render();
   }
 });
 
 /* Close modals tapping outside */
-['movOverlay', 'debtOverlay', 'fixOverlay', 'applyOverlay', 'linkOverlay'].forEach(id => {
+['movOverlay', 'debtOverlay', 'fixOverlay', 'applyOverlay', 'setOverlay'].forEach(id => {
   $('#' + id).addEventListener('click', e => {
     if (e.target.id === id) $('#' + id).classList.remove('open');
   });
 });
 bindMoneyPreview('#fAmt', '#fAmtPrev');
 
-/* ---------- Demo data ---------- */
+/* ---------- Ajustes ---------- */
+$('#settingsBtn').addEventListener('click', () => $('#setOverlay').classList.add('open'));
+$('#setClose').addEventListener('click', () => $('#setOverlay').classList.remove('open'));
+
+/* ---------- Demo data (never touches the real data) ---------- */
+function exitDemo() {
+  data = realData; realData = null; demoMode = false;
+  const p = finPeriod(today());
+  currentMonth = p.ym; currentQ = p.q;
+  $('#demoBanner').style.display = 'none';
+  render();
+  goTo('resumen');
+}
+$('#demoExit').addEventListener('click', exitDemo);
 $('#demoBtn').addEventListener('click', () => {
-  const ym = new Date().toISOString().slice(0, 7);
+  if (!demoMode) realData = data;
+  demoMode = true;
+  $('#setOverlay').classList.remove('open');
+  $('#demoBanner').style.display = 'flex';
+  const ym = today().slice(0, 7);
   const d = day => `${ym}-${String(day).padStart(2, '0')}`;
   const tcId = uid();
   const fixArriendo = uid(), fixServicios = uid(), fixCuota = uid();
@@ -1444,137 +1481,13 @@ $('#demoBtn').addEventListener('click', () => {
 
 /* ---------- Wipe ---------- */
 $('#wipeBtn').addEventListener('click', () => {
-  if (confirm('¿De verdad quieres borrar TODA la información y empezar de cero? Esto no se puede deshacer.\n\nLos registros de WhatsApp anteriores a este momento tampoco volverán (la conexión con el bot se mantiene para los nuevos).\n\nRecuerda: si solo quieres corregir algo, puedes editar (✏️) o eliminar (✕) cada movimiento o deuda por separado.')) {
-    data = { movs: [], debts: [], prios: [], fixed: [], waIgnored: [] };
+  if (demoMode) { alert('Ahora estás viendo datos de ejemplo. Sal del ejemplo primero si quieres borrar tu información real.'); return; }
+  if (confirm('¿De verdad quieres borrar TODA la información y empezar de cero? Esto no se puede deshacer.\n\nRecuerda: si solo quieres corregir algo, puedes editar (✏️) o eliminar (✕) cada movimiento o deuda por separado.')) {
+    data = { movs: [], debts: [], prios: [], fixed: [] };
     store.clear(); save();
-    store.set('miplata_wa_cutoff', Date.now()); // fresh start: old WA records stay gone
+    $('#setOverlay').classList.remove('open');
     render();
   }
-});
-
-/* ---------- WhatsApp sync (read-only: bot → app) ---------- */
-// IMPORTANT: this must be YOUR Apps Script /exec URL (no ?hook= needed for reads)
-const BOT_API = 'https://script.google.com/macros/s/AKfycbzpJi3gSnPTLKr_sQ-aQHxdt27jEipUxqmwdqrWZ6sFLNOJO-Lh58Eq0T3-6U6KestSqw/exec';
-
-function getLink() {
-  const v = store.get('miplata_link', null);
-  if (v && !v.token && v.key) return { token: v.key }; // migrate old {phone,key} format
-  return v;
-}
-function setLink(v) { store.set('miplata_link', v); }
-function renderLinkBtn() {
-  $('#linkBtn').textContent = getLink() ? '📲 WhatsApp conectado' : '📲 Conectar mi WhatsApp';
-}
-function setSyncStatus(text) {
-  const el = $('#syncStatus');
-  if (el) el.textContent = text || '';
-}
-
-// One automatic retry shields against transient network blips on mobile
-async function fetchWithRetry(url) {
-  try {
-    const r = await fetch(url);
-    if (!r.ok) throw new Error('http ' + r.status);
-    return r;
-  } catch (e) {
-    await new Promise(res => setTimeout(res, 1500));
-    const r2 = await fetch(url);
-    if (!r2.ok) throw new Error('http ' + r2.status);
-    return r2;
-  }
-}
-
-async function syncWhatsApp(interactive) {
-  const link = getLink();
-  if (!link || !link.token) { setSyncStatus(''); return; }
-  const hora = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
-  try {
-    const res = await fetchWithRetry(BOT_API + '?action=records&t=' + encodeURIComponent(link.token));
-    const json = await res.json();
-    if (!json.ok) {
-      setSyncStatus('📲 ⚠️ ' + hora + ' — el código no es válido. Toca el link del bot para reconectar.');
-      if (interactive) $('#lnkMsg').textContent = '⚠️ El código no es válido. Toca el link que el bot te envía, o pide uno nuevo con "vincular".';
-      return false;
-    }
-    let added = 0;
-    const total = (json.records || []).length;
-    const cutoff = Number(store.get('miplata_wa_cutoff', 0)); // survives "Borrar todo"
-    (json.records || []).forEach(r => {
-      if (!r.id) return;
-      if (cutoff && r.ts && Number(r.ts) <= cutoff) return; // wiped-before-this records stay gone
-      const id = 'wa_' + r.id;
-      if (data.waIgnored.includes(id)) return;         // user deleted it in the app
-      if (data.movs.some(m => m.id === id)) return;    // already synced (dedup)
-      const monto = Math.round(Number(r.monto)) || 0;
-      if (monto <= 0 || !r.fecha) return;
-      data.movs.push({
-        id, tipo: r.tipo, cat: r.cat, monto,
-        desc: r.desc ? String(r.desc) : '',
-        fecha: String(r.fecha).slice(0, 10),
-        debtId: r.debtId ? 'wad_' + r.debtId : undefined,
-        nomina: r.nomina === true,
-        wa: true
-      });
-      added++;
-    });
-    // Cloud debts: the sheet is the source of truth for their balance
-    let debtsChanged = false;
-    (json.debts || []).forEach(d => {
-      if (!d.id) return;
-      const id = 'wad_' + d.id;
-      if (data.waIgnored.includes(id)) return; // user deleted it in the app
-      const saldo = Math.round(Number(d.saldo)) || 0;
-      const ex = data.debts.find(x => x.id === id);
-      if (ex) {
-        if (ex.saldo !== saldo || ex.nombre !== String(d.nombre)) {
-          ex.saldo = saldo; ex.nombre = String(d.nombre); debtsChanged = true;
-        }
-      } else {
-        data.debts.push({ id, nombre: String(d.nombre), saldo, cuota: 0, tasa: null, wa: true });
-        debtsChanged = true;
-      }
-    });
-    if (added > 0 || debtsChanged) { save(); render(); renderLinkBtn(); }
-    setSyncStatus('📲 ✅ Sincronizado ' + hora + ' — ' + added + ' nuevo(s) de ' + total + ' en la nube.');
-    if (interactive) $('#lnkMsg').textContent = added > 0
-      ? '✅ Sincronizado: ' + added + ' movimiento(s) nuevo(s) desde WhatsApp.'
-      : '✅ Conectado y al día: no hay movimientos nuevos.';
-    return true;
-  } catch (e) {
-    setSyncStatus('📲 ⚠️ ' + hora + ' — error de conexión con el servidor (' + e.message + ').');
-    if (interactive) $('#lnkMsg').textContent = '⚠️ No pudimos conectar con el servidor. Revisa tu internet e inténtalo de nuevo.';
-    return false;
-  }
-}
-
-function openLink() {
-  const link = getLink();
-  $('#lnkKey').value = link ? link.token : '';
-  $('#lnkMsg').textContent = link ? 'Conectado ✓ — se sincroniza solo cada vez que abres la app.' : '';
-  $('#lnkDisconnect').style.display = link ? 'block' : 'none';
-  $('#linkOverlay').classList.add('open');
-}
-$('#linkBtn').addEventListener('click', openLink);
-$('#lnkCancel').addEventListener('click', () => $('#linkOverlay').classList.remove('open'));
-$('#lnkSave').addEventListener('click', async () => {
-  const token = $('#lnkKey').value.trim();
-  if (token.length < 15) {
-    $('#lnkMsg').textContent = '⚠️ El código está incompleto. Cópialo tal cual te lo dio el bot.';
-    return;
-  }
-  setLink({ token });
-  $('#lnkMsg').textContent = 'Conectando…';
-  const ok = await syncWhatsApp(true);
-  renderLinkBtn();
-  if (ok) setTimeout(() => $('#linkOverlay').classList.remove('open'), 1600);
-  else setLink(null); // don't keep bad credentials
-});
-$('#lnkDisconnect').addEventListener('click', () => {
-  if (!confirm('¿Desconectar WhatsApp? Los movimientos ya sincronizados se quedan; solo dejarán de llegar nuevos.')) return;
-  setLink(null);
-  renderLinkBtn();
-  setSyncStatus('');
-  $('#linkOverlay').classList.remove('open');
 });
 
 /* ---------- Init ---------- */
@@ -1596,23 +1509,7 @@ $('#lnkDisconnect').addEventListener('click', () => {
 const jsWarn = document.getElementById('jsWarn');
 if (jsWarn) jsWarn.remove();
 
-// Auto-link from the bot's personalized URL (?t=token).
-// Works in any browser the link opens in — the token identifies the user
-// server-side without exposing the phone number in the URL.
-(function autoLinkFromUrl() {
-  try {
-    const q = new URLSearchParams(location.search);
-    const t = (q.get('t') || q.get('k') || '').trim(); // accept legacy ?k= too
-    if (t.length >= 15) {
-      setLink({ token: t });
-      history.replaceState(null, '', location.pathname); // clean credentials off the URL bar
-    }
-  } catch (e) { /* non-fatal */ }
-})();
-
 render();
-renderLinkBtn();
-syncWhatsApp(false); // silent auto-sync on every open (no-op if not linked)
 </script>
 </body>
 </html>
