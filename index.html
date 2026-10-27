@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Mi Plata — Tu dinero, claro y simple</title>
+<!-- Installable on iPhone/Android: "Agregar a pantalla de inicio" -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mi Plata">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F3F6F5">
 <style>
   :root{
     --bg:#F3F6F5;
@@ -288,7 +297,7 @@
       <div class="logo">💰</div>
       <div>
         <h1>Mi Plata</h1>
-        <small>Tu dinero, claro y simple · v3.7</small>
+        <small>Tu dinero, claro y simple · v3.8</small>
       </div>
     </div>
     <div style="display:flex;gap:8px;align-items:center">
@@ -301,6 +310,8 @@
     <span style="flex:1">✨ <b>Estás viendo datos de ejemplo.</b> Nada de lo que hagas aquí se guarda y tus datos reales siguen intactos.</span>
     <button class="btn primary small" id="demoExit">Salir del ejemplo</button>
   </div>
+
+  <div id="notice" style="grid-column:1 / -1"></div>
 
   <div class="period-seg" id="periodSeg" role="tablist" aria-label="Elegir periodo">
     <button data-q="q1" title="Se financia con la plata que llega el 30/31">1ª quincena (30→14)</button>
@@ -533,6 +544,17 @@
 <div class="overlay" id="setOverlay">
   <div class="sheet">
     <h3>⚙️ Ajustes</h3>
+    <div id="installBox" style="margin-bottom:20px"></div>
+
+    <p style="font-size:15px;font-weight:700;margin-bottom:4px">💾 Copia de seguridad</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:10px">Tu información vive solo en este celular. Guarda una copia de vez en cuando (en iCloud, en tu correo o en un chat contigo) por si pierdes o cambias el teléfono.</p>
+    <div style="display:flex;gap:10px">
+      <button class="btn primary" id="backupBtn" style="flex:1">Guardar copia</button>
+      <button class="btn soft" id="restoreBtn" style="flex:1">Recuperar copia</button>
+    </div>
+    <input type="file" id="restoreFile" accept=".json,application/json" style="display:none">
+    <p id="backupInfo" style="font-size:13px;color:var(--muted);margin:8px 0 20px"></p>
+
     <button class="btn soft full" id="demoBtn">✨ Ver cómo funciona con datos de ejemplo</button>
     <p style="font-size:13px;color:var(--muted);margin:8px 0 20px">Es solo para mirar: tus datos reales no se tocan y vuelves a ellos cuando salgas del ejemplo.</p>
     <div style="border-top:1px solid var(--line);padding-top:16px">
@@ -737,6 +759,7 @@ function render() {
   renderMovs(M);
   renderDebts(M);
   renderTop(M);
+  renderNotice();
 }
 function renderPeriodSeg() {
   document.querySelectorAll('#periodSeg button').forEach(b =>
@@ -1417,8 +1440,116 @@ document.body.addEventListener('click', e => {
 bindMoneyPreview('#fAmt', '#fAmtPrev');
 
 /* ---------- Ajustes ---------- */
-$('#settingsBtn').addEventListener('click', () => $('#setOverlay').classList.add('open'));
+$('#settingsBtn').addEventListener('click', () => { renderSettings(); $('#setOverlay').classList.add('open'); });
 $('#setClose').addEventListener('click', () => $('#setOverlay').classList.remove('open'));
+
+/* ---------- Instalar en el celular + copia de seguridad ---------- */
+const isStandalone = () => window.navigator.standalone === true ||
+  (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const DAY = 86400000;
+const INSTALL_STEPS = `<ol style="font-size:14px;margin:8px 0 0 20px;line-height:1.7">
+  <li>Abre esta página en <b>Safari</b> (la brújula azul 🧭).</li>
+  <li>Toca el botón <b>Compartir</b> (el cuadrito con flecha hacia arriba ⬆️), abajo en el centro.</li>
+  <li>Baja y toca <b>"Agregar a pantalla de inicio"</b> ➕.</li>
+  <li>Toca <b>"Agregar"</b>. ¡Listo! Ábrela siempre desde su ícono 💰.</li>
+</ol>`;
+
+function renderSettings() {
+  $('#installBox').innerHTML = isStandalone()
+    ? `<div class="insight good" style="margin:0"><span class="ico">✅</span><p><b>Mi Plata está instalada</b> en este celular. Ábrela siempre desde su ícono.</p></div>`
+    : `<div class="insight info" style="margin:0;display:block"><p><b>📲 Instálala en tu ${isIOS() ? 'iPhone' : 'celular'}</b> para tenerla como una app, usarla sin internet y que el teléfono no borre tus datos.</p>
+       ${isIOS() ? INSTALL_STEPS : `<p style="font-size:14px;margin-top:6px">En Chrome toca el menú <b>⋮</b> y luego <b>"Instalar app"</b> o <b>"Agregar a pantalla principal"</b>.</p>`}</div>`;
+  const last = Number(store.get('miplata_backup_at', 0));
+  $('#backupInfo').textContent = last
+    ? 'Última copia: ' + new Date(last).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })
+    : 'Todavía no has guardado ninguna copia.';
+}
+
+// One gentle notice at a time on the main screen: install first, then backup
+function renderNotice() {
+  const box = $('#notice');
+  if (demoMode) { box.innerHTML = ''; return; }
+  const dismissed = store.get('miplata_notice_off', {});
+  const last = Number(store.get('miplata_backup_at', 0));
+  const now = Date.now();
+  let html = '';
+  if (isIOS() && !isStandalone() && !(dismissed.install > now)) {
+    html = `<div class="insight info" style="margin-bottom:14px"><span class="ico">📲</span>
+      <p style="flex:1"><b>Instala Mi Plata en tu iPhone</b> para usarla como una app y que no se pierdan tus datos.
+      <button class="btn primary small" data-notice="open" style="margin-top:8px">Ver cómo</button></p>
+      <button class="del" data-notice="install" aria-label="Ahora no">✕</button></div>`;
+  } else if (data.movs.length >= 5 && now - last > 30 * DAY && !(dismissed.backup > now)) {
+    html = `<div class="insight warn" style="margin-bottom:14px"><span class="ico">💾</span>
+      <p style="flex:1">${last ? 'Hace más de un mes que no guardas una copia.' : 'Aún no tienes una copia de tus datos.'} Si pierdes el celular, se pierde todo.
+      <button class="btn primary small" data-notice="backup-now" style="margin-top:8px">Guardar copia ahora</button></p>
+      <button class="del" data-notice="backup" aria-label="Ahora no">✕</button></div>`;
+  }
+  box.innerHTML = html;
+}
+$('#notice').addEventListener('click', e => {
+  const b = e.target.closest('[data-notice]');
+  if (!b) return;
+  const k = b.dataset.notice;
+  if (k === 'open') { renderSettings(); $('#setOverlay').classList.add('open'); return; }
+  if (k === 'backup-now') { saveBackup(); return; }
+  const off = store.get('miplata_notice_off', {});
+  off[k] = Date.now() + 14 * DAY; // ask again in two weeks
+  store.set('miplata_notice_off', off);
+  renderNotice();
+});
+
+async function saveBackup() {
+  if (demoMode) { alert('Ahora estás viendo datos de ejemplo. Sal del ejemplo para guardar la copia de tus datos reales.'); return; }
+  const name = 'MiPlata-copia-' + today() + '.json';
+  const blob = new Blob([JSON.stringify({ app: 'MiPlata', version: 1, savedAt: new Date().toISOString(), data }, null, 1)],
+    { type: 'application/json' });
+  const file = new File([blob], name, { type: 'application/json' });
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'Copia de Mi Plata' }); // iPhone: Guardar en Archivos, iCloud, correo…
+    } else {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    }
+  } catch (e) {
+    if (e && e.name === 'AbortError') return; // closed the share sheet: no copy saved
+    alert('No se pudo guardar la copia. Inténtalo de nuevo.');
+    return;
+  }
+  store.set('miplata_backup_at', Date.now());
+  renderSettings(); renderNotice();
+}
+$('#backupBtn').addEventListener('click', saveBackup);
+$('#restoreBtn').addEventListener('click', () => {
+  if (demoMode) { alert('Sal del ejemplo antes de recuperar una copia.'); return; }
+  $('#restoreFile').value = '';
+  $('#restoreFile').click();
+});
+$('#restoreFile').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  let d;
+  try {
+    const j = JSON.parse(await f.text());
+    d = j && j.app === 'MiPlata' ? j.data : j;
+    if (!d || !Array.isArray(d.movs) || !Array.isArray(d.debts)) throw new Error('formato');
+  } catch (err) {
+    alert('Ese archivo no es una copia de Mi Plata. Busca el archivo que empieza por "MiPlata-copia".');
+    return;
+  }
+  const when = f.name.match(/\d{4}-\d{2}-\d{2}/);
+  if (!confirm(`¿Recuperar esta copia${when ? ' del ' + when[0] : ''}? Tiene ${d.movs.length} movimientos y ${d.debts.length} deudas.\n\nLo que tienes ahora en la app se reemplazará por lo de la copia.`)) return;
+  data = { movs: d.movs, debts: d.debts, prios: d.prios || [], fixed: d.fixed || [] };
+  save();
+  $('#setOverlay').classList.remove('open');
+  render();
+  goTo('resumen');
+  alert('✅ Copia recuperada.');
+});
 
 /* ---------- Demo data (never touches the real data) ---------- */
 function exitDemo() {
@@ -1510,6 +1641,12 @@ const jsWarn = document.getElementById('jsWarn');
 if (jsWarn) jsWarn.remove();
 
 render();
+
+// Installed app: work offline and ask the phone not to clear our data
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 </script>
 </body>
 </html>
