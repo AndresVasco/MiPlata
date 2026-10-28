@@ -137,18 +137,6 @@
   .del:active{background:var(--red-soft);color:var(--red)}
   .edit:active{background:var(--green-soft)}
 
-  /* ---------- Deudas ---------- */
-  .debt-total{
-    background:var(--violet-soft);border-radius:14px;padding:14px;margin-bottom:14px;
-  }
-  .debt-total .lbl{font-size:12px;font-weight:600;color:var(--violet)}
-  .debt-total .val{font-size:24px;font-weight:800;color:var(--violet);letter-spacing:-.4px}
-  .debt-total .cuota{font-size:13px;color:var(--muted);margin-top:2px}
-  .debt-card{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
-  .debt-card .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-  .debt-card .head .n{font-weight:700;font-size:15px}
-  .debt-card .meta{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
-  .debt-card .meta b{color:var(--ink)}
 
   /* ---------- Empty states ---------- */
   .empty{
@@ -314,6 +302,58 @@
   .tiles.list{grid-template-columns:1fr}
   .tiles.list .tile{text-align:left;padding:12px 14px}
   .lbl2{display:block;font-size:15px;font-weight:700;margin:16px 0 8px}
+  /* ---------- Fase 3 ---------- */
+  .hello{font-size:19px;font-weight:700;margin:0 0 10px}
+  .acct{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .acct:last-child{border-bottom:none}
+  .acct .n{flex:1;min-width:0;font-size:16px;font-weight:600;cursor:pointer}
+  .acct .n small{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-top:2px}
+  .acct .m{font-size:16px;font-weight:800;white-space:nowrap}
+  .acct .m.in{color:var(--green)}.acct .m.sv{color:var(--teal)}
+  .chk{
+    width:40px;height:40px;border-radius:50%;border:3px solid var(--line);background:var(--surface);flex:none;
+    display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:800;color:#fff;cursor:pointer;
+  }
+  .chk.ok{background:var(--green);border-color:var(--green)}
+  .qchk{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:700;color:var(--muted)}
+  .qchk .chk{width:34px;height:34px;font-size:16px}
+  .mrow{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer;width:100%;
+    background:none;border-left:none;border-right:none;border-top:none;font-family:var(--font);text-align:left;color:var(--ink)}
+  .mrow:last-of-type{border-bottom:none}
+  .mrow .ic{width:42px;height:42px;border-radius:13px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:21px;flex:none}
+  .mrow .n{flex:1;min-width:0;font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mrow .n small{display:block;font-size:13px;font-weight:500;color:var(--muted)}
+  .mrow .m{font-size:16px;font-weight:800;white-space:nowrap}
+  .mrow .m.in{color:var(--green)}.mrow .m.out{color:var(--red)}.mrow .m.sv{color:var(--teal)}.mrow .m.nom{color:var(--violet)}
+  .mrow .go{color:var(--muted);font-size:20px}
+  .prog{height:16px;background:var(--violet-soft);border-radius:9px;overflow:hidden;margin:8px 0 6px}
+  .prog i{display:block;height:100%;background:var(--violet);border-radius:9px}
+  .debt .head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .debt .facts{font-size:14px;color:var(--muted);margin-top:8px;line-height:1.6}
+  .seg-toggle button.on.plain{background:var(--ink);color:#fff}
+  .toast{
+    position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom));z-index:70;
+    width:calc(100% - 32px);max-width:488px;background:var(--ink);color:#fff;border-radius:16px;padding:12px 14px;
+    display:none;align-items:center;gap:10px;font-size:15px;box-shadow:0 8px 24px rgba(0,0,0,.25);
+  }
+  .toast.open{display:flex}
+  .toast span{flex:1}
+  .toast button{border:none;background:rgba(255,255,255,.15);color:#fff;font-family:var(--font);font-weight:700;font-size:14px;border-radius:10px;padding:8px 10px;cursor:pointer}
+  @media(min-width:900px){.toast{bottom:32px}}
+  /* Bienvenida */
+  .onb{position:fixed;inset:0;background:var(--bg);z-index:90;display:none;overflow-y:auto}
+  .onb.open{display:block}
+  .onb-in{max-width:480px;margin:0 auto;padding:calc(36px + env(safe-area-inset-top)) 20px 40px}
+  .ostep{display:none}
+  .onb h1{font-size:26px;font-weight:800;text-align:center;margin:10px 0 6px;line-height:1.2}
+  .onb .lead{font-size:17px;color:var(--muted);margin-bottom:18px}
+  .onb .field input{font-size:18px;padding:14px}
+  .onb .btn{font-size:18px;padding:16px}
+  .onb .tile{font-size:18px;padding:16px}
+  .onb .tile small{font-size:14px}
+  .dots{display:flex;gap:8px;justify-content:center;margin:0 0 22px}
+  .dots i{width:10px;height:10px;border-radius:5px;background:var(--line)}
+  .dots i.on{background:var(--green);width:28px}
   .col-side{display:none}
   @media(min-width:900px){.col-side{display:block}}
 
@@ -365,6 +405,7 @@
 
     <!-- ============ VISTA: RESUMEN ============ -->
     <section data-view="resumen" class="active">
+      <p class="hello" id="hello" style="display:none"></p>
       <div id="hero" class="hero empty"></div>
 
       <div class="quick">
@@ -392,21 +433,18 @@
       </div>
     </section>
 
-    <!-- ============ VISTA: MOVIMIENTOS ============ -->
+    <!-- ============ VISTA: MIS CUENTAS ============ -->
     <section data-view="movs">
       <h2 class="view-title-desktop">Mis cuentas</h2>
       <div class="card">
-        <h3>Tus fijos de cada periodo ⚡</h3>
-        <p class="sub">Lo que se repite cada mes o quincena: arriendo, servicios, cuotas… ¡y tu ahorro! Guárdalos una vez y regístralos con un toque — puedes ajustar el monto antes de guardar si esta vez fue distinto.</p>
+        <h3 class="big">📋 Mis cuentas del mes</h3>
+        <p class="sub" id="fixedSub">Lo que pagas o recibes siempre. Toca el círculo cuando ya esté hecho.</p>
         <div id="fixedList"></div>
-        <div class="actions" style="display:flex;gap:10px;margin-top:8px">
-          <button class="btn soft" id="addFixedBtn" style="flex:1">＋ Agregar un fijo</button>
-          <button class="btn primary" id="fixApplyAll" style="flex:1">Registrar todos</button>
-        </div>
+        <button class="btn soft full" id="addFixedBtn" style="margin-top:10px">＋ Agregar otra cuenta</button>
       </div>
       <div class="card">
-        <h3>Tus movimientos 🧾</h3>
-        <p class="sub">Todo lo que entró y salió en este periodo, de lo más reciente a lo más viejo. Toca ✏️ para corregir un dato sin perder nada más.</p>
+        <h3 class="big">🧾 Lo último que anotaste</h3>
+        <p class="sub">Toca uno para corregirlo o borrarlo.</p>
         <div id="movList"></div>
       </div>
     </section>
@@ -414,13 +452,9 @@
     <!-- ============ VISTA: DEUDAS ============ -->
     <section data-view="deudas">
       <h2 class="view-title-desktop">Lo que debo</h2>
-      <div class="card">
-        <h3>Tus deudas 💳</h3>
-        <p class="sub">Anota todo lo que debes: tarjetas, préstamos, la plata que te prestó un amigo… ¡todo cuenta!</p>
-        <div id="debtSummary"></div>
-        <div id="debtList"></div>
-        <button class="btn soft full" id="addDebtBtn" style="margin-top:8px">＋ Agregar una deuda</button>
-      </div>
+      <div id="debtSummary"></div>
+      <div id="debtList"></div>
+      <button class="btn primary full" id="addDebtBtn" style="margin-bottom:14px">＋ Agregar una deuda</button>
     </section>
   </div>
 
@@ -435,6 +469,7 @@
 </div>
 
 <button class="fab" id="fab" aria-label="Agregar movimiento">＋</button>
+<div class="toast" id="toast" role="status"></div>
 
 <nav class="tabbar">
   <button class="tab active" data-goto="resumen"><span class="ti">🏠</span>Inicio</button>
@@ -474,6 +509,7 @@
       </div>
       <div class="date-line">Fecha: <b id="dateTxt">hoy</b> · <button class="linkbtn" id="dateToggle" style="padding:4px 0">¿fue otro día?</button></div>
       <div class="field" id="dateField" style="display:none;margin-top:8px"><input type="date" id="movDate"></div>
+      <button class="btn danger full" id="movDelete" style="display:none;margin-top:12px">🗑️ Borrar este registro</button>
       <div class="actions">
         <button class="btn soft" data-movclose>Cancelar</button>
         <button class="btn primary" id="m1Next">Siguiente →</button>
@@ -532,68 +568,132 @@
       <button class="btn soft" id="debtCancel">Cancelar</button>
       <button class="btn primary" id="debtSave">Guardar</button>
     </div>
+    <button class="btn danger full" id="debtDelete" style="display:none;margin-top:10px">🗑️ Borrar esta deuda</button>
   </div>
 </div>
 
-<!-- ============ MODAL: GASTO FIJO ============ -->
+<!-- ============ MODAL: CUENTA DEL MES ============ -->
 <div class="overlay" id="fixOverlay">
   <div class="sheet">
-    <h3 id="fixTitle">Agregar un fijo</h3>
+    <h3 id="fixTitle">Agregar una cuenta</h3>
     <div class="seg-toggle">
-      <button id="ftGasto" class="gasto on">🛒 Gasto</button>
+      <button id="ftGasto" class="gasto on">🛒 Pago</button>
+      <button id="ftIngreso" class="ingreso">💵 Me pagan</button>
       <button id="ftAhorro" class="ahorro">🐷 Ahorro</button>
     </div>
     <div class="field">
       <label>¿Cómo se llama?</label>
-      <input type="text" id="fName" placeholder="Ej: Arriendo, cuota TC, ahorro quincenal…">
+      <input type="text" id="fName" placeholder="Ej: Arriendo, luz, cuota de la tarjeta…">
     </div>
     <div class="field">
-      <label>¿Cuánto suele ser? (pesos — podrás ajustarlo cada vez que lo registres)</label>
+      <label>¿Cuánto suele ser? (si un mes cambia, lo corriges ese mes)</label>
       <input type="text" id="fAmt" inputmode="numeric" placeholder="Ej: 850000">
       <div class="money-preview" id="fAmtPrev"></div>
     </div>
     <div class="field">
-      <label>Categoría</label>
+      <label>¿Cada cuánto?</label>
+      <div class="seg-toggle" id="fFreq" style="margin-bottom:0">
+        <button class="plain" data-freq="mensual">Una vez al mes</button>
+        <button class="plain" data-freq="quincenal">Cada quincena</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>¿De qué tipo es?</label>
       <div class="chips" id="fixChips"></div>
     </div>
     <div class="field" id="fixDebtField" style="display:none">
-      <label>¿A cuál de tus deudas corresponde esta cuota? (cada vez que la registres, el saldo bajará solo — ideal para descuentos de nómina)</label>
+      <label>¿De cuál deuda es esta cuota? Cada vez que la marques, la deuda bajará sola.</label>
       <select id="fixDebt"></select>
-      <label style="display:flex;align-items:flex-start;gap:8px;margin-top:10px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer">
-        <input type="checkbox" id="fixNomina" style="width:18px;height:18px;margin-top:1px;accent-color:var(--violet)">
-        <span>🏢 Me la descuentan de la nómina: baja la deuda pero <b>no</b> la cuentes como gasto de mi bolsillo</span>
-      </label>
     </div>
     <div class="actions">
       <button class="btn soft" id="fixCancel">Cancelar</button>
       <button class="btn primary" id="fixSave">Guardar</button>
     </div>
+    <button class="btn danger full" id="fixDelete" style="display:none;margin-top:10px">🗑️ Quitar esta cuenta de la lista</button>
   </div>
 </div>
 
-<!-- ============ MODAL: REGISTRAR TODOS LOS FIJOS ============ -->
-<div class="overlay" id="applyOverlay">
-  <div class="sheet">
-    <h3>Registrar todos los fijos</h3>
-    <p id="applySummary" style="font-size:14px;color:var(--muted);margin-bottom:14px"></p>
-    <div class="field">
-      <label>¿Con qué fecha? (define en cuál quincena quedan)</label>
-      <input type="date" id="applyDate">
+<!-- ============ BIENVENIDA ============ -->
+<div class="onb" id="onb">
+  <div class="onb-in">
+    <div class="ostep" id="o1">
+      <div style="font-size:72px;text-align:center;line-height:1">💰</div>
+      <h1>¡Te damos la bienvenida a Mi Plata!</h1>
+      <p class="lead" style="text-align:center">Aquí vas a ver, de forma sencilla, cuánta plata te entra, en qué se va y cuánto te queda. Te haremos 3 preguntas cortas y listo.</p>
+      <div class="field">
+        <label style="font-size:16px;color:var(--ink)">¿Cómo te llamas? (opcional)</label>
+        <input type="text" id="oName" placeholder="Tu nombre" autocomplete="given-name">
+      </div>
+      <button class="btn primary full" data-ogo="2">Empezar →</button>
+      <div style="text-align:center;margin-top:14px"><button class="linkbtn" id="oDemo">Solo quiero mirar cómo funciona</button></div>
+      <div style="text-align:center"><button class="linkbtn" id="oRestore" style="color:var(--muted)">¿Ya tenías Mi Plata en otro celular? Recuperar mi copia</button></div>
     </div>
-    <div class="actions">
-      <button class="btn soft" id="applyCancel">Cancelar</button>
-      <button class="btn primary" id="applyConfirm">Registrar</button>
+
+    <div class="ostep" id="o2">
+      <div class="dots"><i class="on"></i><i></i><i></i></div>
+      <div class="q">¿Cada cuánto te pagan?</div>
+      <div class="tiles list" id="oPay">
+        <button class="tile" data-pay="mensual">📅 Una vez al mes</button>
+        <button class="tile" data-pay="quincenal">📅📅 Cada quincena<small>por ejemplo, el 15 y el 30</small></button>
+        <button class="tile" data-pay="varia">🔀 Varía<small>trabajo por mi cuenta o me pagan distinto cada vez</small></button>
+      </div>
+      <p class="money-preview" id="o2Msg" style="color:var(--red);font-weight:700"></p>
+      <div class="actions" style="display:flex;gap:10px;margin-top:10px">
+        <button class="btn soft" data-ogo="1" style="flex:1">← Atrás</button>
+        <button class="btn primary" id="o2Next" style="flex:1">Siguiente →</button>
+      </div>
+    </div>
+
+    <div class="ostep" id="o3">
+      <div class="dots"><i></i><i class="on"></i><i></i></div>
+      <div class="q" id="o3Q">¿Cuánto te pagan, más o menos?</div>
+      <p class="lead">Así te recordamos tu pago en "Mis cuentas". Si no sabes, déjalo vacío.</p>
+      <div class="field">
+        <input type="text" id="oIncome" inputmode="numeric" placeholder="Ej: 1500000">
+        <div class="money-preview" id="oIncomePrev" style="font-size:15px"></div>
+      </div>
+      <div class="actions" style="display:flex;gap:10px;margin-top:10px">
+        <button class="btn soft" data-ogo="2" style="flex:1">← Atrás</button>
+        <button class="btn primary" data-ogo="4" style="flex:1">Siguiente →</button>
+      </div>
+    </div>
+
+    <div class="ostep" id="o4">
+      <div class="dots"><i></i><i></i><i class="on"></i></div>
+      <div class="q">¿Debes algo?</div>
+      <p class="lead">Tarjetas, préstamos, plata que te prestó alguien…</p>
+      <div class="tiles list" id="oDebt">
+        <button class="tile" data-odebt="si">💳 Sí, debo algo<small>la anotamos ahora mismo</small></button>
+        <button class="tile" data-odebt="no">🙌 No debo nada</button>
+      </div>
+      <p class="money-preview" id="o4Msg" style="color:var(--red);font-weight:700"></p>
+      <div class="actions" style="display:flex;gap:10px;margin-top:10px">
+        <button class="btn soft" id="o4Back" style="flex:1">← Atrás</button>
+        <button class="btn primary" id="oFinish" style="flex:1">✓ Listo</button>
+      </div>
     </div>
   </div>
 </div>
-
-
 
 <!-- ============ MODAL: AJUSTES ============ -->
 <div class="overlay" id="setOverlay">
   <div class="sheet">
     <h3>⚙️ Ajustes</h3>
     <div id="installBox" style="margin-bottom:20px"></div>
+
+    <p style="font-size:15px;font-weight:700;margin-bottom:8px">👤 Sobre ti</p>
+    <div class="field">
+      <label>Tu nombre</label>
+      <input type="text" id="sName" placeholder="Tu nombre (opcional)">
+    </div>
+    <div class="field" style="margin-bottom:20px">
+      <label>¿Cada cuánto te pagan?</label>
+      <select id="sPay">
+        <option value="mensual">Una vez al mes</option>
+        <option value="quincenal">Cada quincena (verás la plata por quincenas)</option>
+        <option value="varia">Varía</option>
+      </select>
+    </div>
 
     <p style="font-size:15px;font-weight:700;margin-bottom:4px">💾 Copia de seguridad</p>
     <p style="font-size:13px;color:var(--muted);margin-bottom:10px">Tu información vive solo en este celular. Guarda una copia de vez en cuando (en iCloud, en tu correo o en un chat contigo) por si pierdes o cambias el teléfono.</p>
@@ -613,7 +713,7 @@
     <div class="actions">
       <button class="btn soft" id="setClose">Cerrar</button>
     </div>
-    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:12px">Mi Plata · versión 4.0</p>
+    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:12px">Mi Plata · versión 4.1</p>
   </div>
 </div>
 
@@ -731,13 +831,17 @@ let data = store.get('miplata_data', { movs: [], debts: [], prios: [], fixed: []
 if (!data.prios) data.prios = [];
 if (!data.fixed) data.fixed = [];
 delete data.waIgnored;
+// Older installs already have data: skip the welcome and keep the quincena view they knew
+if (!data.settings) data.settings = (data.movs.length || data.debts.length || data.fixed.length)
+  ? { name: '', pay: 'quincenal', onboarded: true }
+  : { name: '', pay: 'mensual', onboarded: false };
 // WhatsApp integration was removed: drop its leftover keys
 store.remove('miplata_link');
 store.remove('miplata_wa_cutoff');
 let demoMode = false, realData = null; // demo works on a throwaway copy
 const _todayPeriod = finPeriod(today());
 let currentMonth = _todayPeriod.ym;
-let currentQ = _todayPeriod.q; // 'q1' | 'q2' | 'all'
+let currentQ = data.settings.pay === 'quincenal' ? _todayPeriod.q : 'all'; // 'q1' | 'q2' | 'all'
 let currentView = 'resumen';
 let editingMovId = null;
 let editingDebtId = null;
@@ -840,6 +944,13 @@ function applyDebtDelta(debtId, delta) {
 
 /* ---------- RENDER: everything ---------- */
 function render() {
+  // Quincenas only for people paid every fortnight
+  const quin = data.settings && data.settings.pay === 'quincenal';
+  $('#periodSeg').style.display = quin ? 'flex' : 'none';
+  if (!quin) currentQ = 'all';
+  const name = data.settings && data.settings.name;
+  $('#hello').style.display = name ? 'block' : 'none';
+  $('#hello').textContent = name ? `Hola, ${name} 👋` : '';
   renderMonthNav();
   renderPeriodSeg();
   const M = monthData();
@@ -1067,30 +1178,39 @@ function renderPrio(M) {
   box.innerHTML = tips.join('');
 }
 
-/* ---------- Movimientos list ---------- */
+/* ---------- Lo último que anotaste ---------- */
+function dayLabel(f) {
+  const y = new Date(Date.now() - 86400000);
+  const ayer = y.getFullYear() + '-' + String(y.getMonth() + 1).padStart(2, '0') + '-' + String(y.getDate()).padStart(2, '0');
+  if (f === today()) return 'Hoy';
+  if (f === ayer) return 'Ayer';
+  return +f.slice(8, 10) + ' ' + MESES[+f.slice(5, 7) - 1].slice(0, 3).toLowerCase();
+}
+let showAllMovs = false;
 function renderMovs(M) {
   const box = $('#movList');
   if (M.movs.length === 0) {
-    box.innerHTML = `<div class="empty"><span class="big-ico">🧾</span>No hay movimientos en ${monthLabel(currentMonth)}.<br>Usa el botón verde ＋ para anotar el primero.</div>`;
+    box.innerHTML = `<div class="empty"><span class="big-ico">🧾</span>Todavía no hay nada anotado ${PW()}.<br>Usa el botón verde ＋ para anotar lo primero.</div>`;
     return;
   }
   const sorted = [...M.movs].sort((a, b) => b.fecha.localeCompare(a.fecha));
-  box.innerHTML = sorted.map(m => {
+  const shown = showAllMovs ? sorted : sorted.slice(0, 8);
+  box.innerHTML = shown.map(m => {
     const c = catById(m.cat);
     const sign = m.tipo === 'ingreso' ? '+' : '−';
     const cls = m.tipo === 'ingreso' ? 'in' : (m.tipo === 'ahorro' ? 'sv' : (m.nomina ? 'nom' : 'out'));
-    return `<div class="item">
-      <div class="emoji">${c.emoji}</div>
-      <div class="info">
-        <div class="t">${esc(m.desc || c.name)}</div>
-        <div class="d">${esc(c.name)} · ${m.fecha.slice(8,10)}/${m.fecha.slice(5,7)}${m.nomina ? ' · 🏢 descontado de nómina' : ''}</div>
-      </div>
-      <div class="amt ${cls}">${sign}${fmt(m.monto)}</div>
-      <button class="edit" data-editmov="${m.id}" aria-label="Editar">✏️</button>
-      <button class="del" data-delmov="${m.id}" aria-label="Eliminar">✕</button>
-    </div>`;
-  }).join('');
+    return `<button class="mrow" data-editmov="${m.id}">
+      <span class="ic">${c.emoji}</span>
+      <span class="n">${esc(m.desc || c.name)}<small>${dayLabel(m.fecha)} · ${esc(c.name)}${m.nomina ? ' · 🏢 por nómina' : ''}</small></span>
+      <span class="m ${cls}">${sign}${fmt(m.monto)}</span>
+      <span class="go">›</span>
+    </button>`;
+  }).join('') + (sorted.length > 8
+    ? `<button class="linkbtn" data-allmovs>${showAllMovs ? 'Ver menos' : `Ver todo (${sorted.length - 8} más)`}</button>` : '');
 }
+$('#movList').addEventListener('click', e => {
+  if (e.target.closest('[data-allmovs]')) { showAllMovs = !showAllMovs; renderMovs(monthData()); }
+});
 
 /* ---------- Top 5 gastos ---------- */
 function renderTop(M) {
@@ -1131,32 +1251,123 @@ function periodDefaultDate() {
   if (inPeriod(t)) return t;
   return currentMonth + (currentQ === 'q2' ? '-16' : '-01');
 }
+const fixFreqOf = t => t.freq || 'mensual';
+// What was already registered for this template in the month on screen
+function fixedStatus(t) {
+  const movs = data.movs.filter(m => m.fixedId === t.id && finPeriod(m.fecha).ym === currentMonth);
+  if (fixFreqOf(t) === 'quincenal')
+    return { q1: movs.find(m => finPeriod(m.fecha).q === 'q1'), q2: movs.find(m => finPeriod(m.fecha).q === 'q2') };
+  return { m: movs[0] };
+}
 function renderFixed(M) {
   const box = $('#fixedList');
   if (data.fixed.length === 0) {
-    box.innerHTML = `<div class="empty"><span class="big-ico">⚡</span>Guarda aquí lo que se repite cada periodo (arriendo, servicios, cuotas… ¡y tu ahorro!) y regístralo con un solo toque.</div>`;
+    $('#fixedSub').textContent = 'Lo que pagas o recibes siempre. Toca el círculo cuando ya esté hecho.';
+    box.innerHTML = `<div class="empty"><span class="big-ico">📋</span>Agrega lo que se repite siempre: tu sueldo, el arriendo, los servicios, las cuotas… Cada mes solo tendrás que marcarlas con un toque.</div>`;
     return;
   }
+  let done = 0, total = 0;
+  const doneWord = t => t.tipo === 'ingreso' ? 'Recibido' : t.tipo === 'ahorro' ? 'Guardado' : 'Pagado';
+  const todoWord = t => t.tipo === 'ingreso' ? 'cuando te paguen' : t.tipo === 'ahorro' ? 'cuando lo guardes' : 'cuando lo pagues';
   box.innerHTML = data.fixed.map(t => {
     const c = catById(t.cat);
-    const applied = M.movs.some(m => m.fixedId === t.id);
-    const linked = t.debtId ? data.debts.find(d => d.id === t.debtId) : null;
-    return `<div class="item">
-      <div class="emoji">${c.emoji}</div>
-      <div class="info">
-        <div class="t">${esc(t.nombre)}</div>
-        <div class="d">${esc(c.name)} · suele ser ${fmt(t.monto)}${linked ? ` · 🔗 baja saldo de "${esc(linked.nombre)}"${t.nomina ? ' (nómina)' : ''}` : ''}</div>
-      </div>
-      ${applied
-        ? `<span style="font-size:12px;font-weight:700;color:var(--green)">✓ Registrado</span>`
-        : `<button class="btn soft small" data-applyfix="${t.id}">Registrar</button>`}
-      <button class="edit" data-editfix="${t.id}" aria-label="Editar">✏️</button>
-      <button class="del" data-delfix="${t.id}" aria-label="Eliminar">✕</button>
+    const st = fixedStatus(t);
+    const cls = t.tipo === 'ingreso' ? 'in' : t.tipo === 'ahorro' ? 'sv' : '';
+    let checks, note, amt;
+    if (fixFreqOf(t) === 'quincenal') {
+      total += 2; done += (st.q1 ? 1 : 0) + (st.q2 ? 1 : 0);
+      checks = ['q1', 'q2'].map(q => `<span class="qchk"><button class="chk ${st[q] ? 'ok' : ''}" data-chk="${t.id}" data-q="${q}" aria-label="${q === 'q1' ? '1ª' : '2ª'} quincena">${st[q] ? '✓' : ''}</button>${q === 'q1' ? '1ª' : '2ª'}</span>`).join('');
+      note = 'Cada quincena · ' + (st.q1 && st.q2 ? '✓ las dos listas' : st.q1 || st.q2 ? 'falta una' : 'toca el círculo ' + todoWord(t));
+      amt = t.monto;
+    } else {
+      total += 1; if (st.m) done++;
+      checks = `<button class="chk ${st.m ? 'ok' : ''}" data-chk="${t.id}" aria-label="Marcar ${esc(t.nombre)}">${st.m ? '✓' : ''}</button>`;
+      note = st.m ? `${doneWord(t)} · ${dayLabel(st.m.fecha)}` : 'Pendiente · toca el círculo ' + todoWord(t);
+      amt = st.m ? st.m.monto : t.monto;
+    }
+    return `<div class="acct">
+      ${checks}
+      <div class="n" data-editfix="${t.id}">${c.emoji} ${esc(t.nombre)}<small>${note}</small></div>
+      <span class="m ${cls}">${fmt(amt)}</span>
     </div>`;
   }).join('');
+  $('#fixedSub').textContent = done === total
+    ? `✓ ¡Todo al día en ${MESES[+currentMonth.slice(5, 7) - 1].toLowerCase()}! Toca un nombre para cambiarlo.`
+    : `Llevas ${done} de ${total}. Toca el círculo cuando ya esté hecho, o el nombre para cambiarlo.`;
 }
 
-let editingFixedId = null, fixTipo = 'gasto', fixCat = 'vivienda', fixDebtSel = '';
+// A date inside the month (and quincena) being marked: today if it fits, otherwise its first day
+function dateFor(ym, q) {
+  const t = today(), p = finPeriod(t);
+  if (p.ym === ym && (!q || p.q === q)) return t;
+  return ym + (q === 'q2' ? '-16' : '-01');
+}
+function quickApply(t, fecha) {
+  const tipo = t.tipo || 'gasto';
+  const mov = { id: uid(), tipo, cat: t.cat, monto: t.monto, desc: t.nombre, fecha, fixedId: t.id };
+  if (tipo === 'gasto' && t.cat === 'deudapago' && t.debtId && data.debts.some(d => d.id === t.debtId)) {
+    const dbt = data.debts.find(d => d.id === t.debtId);
+    mov.debtId = t.debtId;
+    mov.nomina = !!(t.nomina || dbt.nomina);
+    applyDebtDelta(t.debtId, -t.monto);
+  }
+  data.movs.push(mov);
+  save(); render();
+  return mov;
+}
+function deleteMov(id) {
+  const mov = data.movs.find(m => m.id === id);
+  if (!mov) return;
+  if (mov.debtId) applyDebtDelta(mov.debtId, +mov.monto);
+  data.movs = data.movs.filter(m => m.id !== id);
+  save(); render();
+}
+
+/* ---------- Aviso corto con "Deshacer" ---------- */
+let toastTimer = null;
+function toast(text, actions) {
+  const el = $('#toast');
+  el.innerHTML = `<span>${esc(text)}</span>` + (actions || []).map((a, i) => `<button data-ti="${i}">${esc(a[0])}</button>`).join('');
+  el.onclick = e => {
+    const b = e.target.closest('[data-ti]');
+    if (!b) return;
+    el.classList.remove('open');
+    actions[+b.dataset.ti][1]();
+  };
+  el.classList.add('open');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('open'), 7000);
+}
+
+$('#fixedList').addEventListener('click', e => {
+  const b = e.target.closest('[data-chk]');
+  if (!b) return;
+  const t = data.fixed.find(x => x.id === b.dataset.chk);
+  if (!t) return;
+  const q = b.dataset.q || null;
+  const st = fixedStatus(t);
+  const existing = q ? st[q] : st.m;
+  if (existing) {
+    if (!confirm(`¿Desmarcar "${t.nombre}"? Se borra lo que anotaste (${fmt(existing.monto)}, ${dayLabel(existing.fecha).toLowerCase()}).`)) return;
+    deleteMov(existing.id);
+    return;
+  }
+  const mov = quickApply(t, dateFor(currentMonth, q));
+  toast(`✓ ${t.nombre}: ${fmt(mov.monto)}`, [
+    ['Deshacer', () => deleteMov(mov.id)],
+    ['Otro valor', () => openMov(data.movs.find(m => m.id === mov.id))]
+  ]);
+});
+
+let editingFixedId = null, fixTipo = 'gasto', fixCat = 'vivienda', fixDebtSel = '', fixFreq = 'mensual';
+function setFixFreq(f) {
+  fixFreq = f;
+  document.querySelectorAll('#fFreq [data-freq]').forEach(b => b.classList.toggle('on', b.dataset.freq === f));
+}
+$('#fFreq').addEventListener('click', e => {
+  const b = e.target.closest('[data-freq]');
+  if (b) setFixFreq(b.dataset.freq);
+});
 function renderFixChips() {
   const cats = pickCats(fixTipo, fixCat);
   if (!cats.some(c => c.id === fixCat)) fixCat = cats[0].id;
@@ -1180,10 +1391,12 @@ function updateFixDebtField() {
 function setFixTipo(t) {
   fixTipo = t;
   $('#ftGasto').classList.toggle('on', t === 'gasto');
+  $('#ftIngreso').classList.toggle('on', t === 'ingreso');
   $('#ftAhorro').classList.toggle('on', t === 'ahorro');
   renderFixChips();
 }
 $('#ftGasto').addEventListener('click', () => setFixTipo('gasto'));
+$('#ftIngreso').addEventListener('click', () => setFixTipo('ingreso'));
 $('#ftAhorro').addEventListener('click', () => setFixTipo('ahorro'));
 $('#fixDebt').addEventListener('change', e => { fixDebtSel = e.target.value; });
 $('#fixChips').addEventListener('click', e => {
@@ -1192,13 +1405,14 @@ $('#fixChips').addEventListener('click', e => {
 });
 function openFixed(t) {
   editingFixedId = t ? t.id : null;
-  $('#fixTitle').textContent = t ? 'Editar fijo' : 'Agregar un fijo';
+  $('#fixTitle').textContent = t ? 'Cambiar esta cuenta' : 'Agregar una cuenta';
+  $('#fixDelete').style.display = t ? 'block' : 'none';
+  setFixFreq(t ? fixFreqOf(t) : 'mensual');
   $('#fName').value = t ? t.nombre : '';
   $('#fAmt').value = t ? String(t.monto) : '';
   $('#fAmtPrev').textContent = t ? '= ' + fmt(t.monto) + ' pesos' : '';
   fixCat = t ? t.cat : 'vivienda';
   fixDebtSel = t && t.debtId ? t.debtId : '';
-  $('#fixNomina').checked = !!(t && t.nomina);
   setFixTipo(t && t.tipo ? t.tipo : 'gasto');
   $('#fixOverlay').classList.add('open');
 }
@@ -1209,57 +1423,26 @@ $('#fixSave').addEventListener('click', () => {
   const monto = numVal('#fAmt');
   if (!nombre || !monto) { $('#fAmtPrev').textContent = '⚠️ Falta el nombre o el monto'; return; }
   const debtId = (fixTipo === 'gasto' && fixCat === 'deudapago' && fixDebtSel) ? fixDebtSel : null;
-  const nomina = !!(debtId && $('#fixNomina').checked);
   if (editingFixedId) {
     const i = data.fixed.findIndex(t => t.id === editingFixedId);
-    if (i > -1) data.fixed[i] = { ...data.fixed[i], nombre, monto, tipo: fixTipo, cat: fixCat, debtId, nomina };
+    // An older template may carry its own payroll flag; keep it while it points at the same debt
+    const nomina = i > -1 && !!data.fixed[i].nomina && data.fixed[i].debtId === debtId;
+    if (i > -1) data.fixed[i] = { ...data.fixed[i], nombre, monto, tipo: fixTipo, cat: fixCat, debtId, nomina, freq: fixFreq };
   } else {
-    data.fixed.push({ id: uid(), nombre, monto, tipo: fixTipo, cat: fixCat, debtId, nomina });
+    data.fixed.push({ id: uid(), nombre, monto, tipo: fixTipo, cat: fixCat, debtId, freq: fixFreq });
   }
   save();
   editingFixedId = null;
   $('#fixOverlay').classList.remove('open');
   render();
 });
-$('#fixApplyAll').addEventListener('click', () => {
-  const M = monthData();
-  const pending = data.fixed.filter(t => !M.movs.some(m => m.fixedId === t.id));
-  if (pending.length === 0) { alert('Todos tus fijos ya están registrados en este periodo. ✓'); return; }
-  const tot = pending.reduce((s, t) => s + t.monto, 0);
-  $('#applySummary').textContent =
-    `Se registrarán ${pending.length} fijos por un total de ${fmt(tot)}: ` +
-    pending.map(t => t.nombre).join(', ') +
-    '. Después puedes editar (✏️) cualquiera si el monto fue distinto.';
-  $('#applyDate').value = periodDefaultDate();
-  $('#applyOverlay').classList.add('open');
-});
-$('#applyCancel').addEventListener('click', () => $('#applyOverlay').classList.remove('open'));
-$('#applyConfirm').addEventListener('click', () => {
-  const fecha = $('#applyDate').value || periodDefaultDate();
-  const fp = finPeriod(fecha);
-  // Recompute pending against the chosen date's financial fortnight
-  const pending = data.fixed.filter(t =>
-    !data.movs.some(m => {
-      if (m.fixedId !== t.id) return false;
-      const mp = finPeriod(m.fecha);
-      return mp.ym === fp.ym && mp.q === fp.q;
-    }));
-  pending.forEach(t => {
-    const tipo = t.tipo || 'gasto';
-    const payload = { id: uid(), tipo, cat: t.cat, monto: t.monto, desc: t.nombre, fecha, fixedId: t.id };
-    if (tipo === 'gasto' && t.cat === 'deudapago' && t.debtId) {
-      payload.debtId = t.debtId;
-      const dbt = data.debts.find(d => d.id === t.debtId);
-      payload.nomina = !!(t.nomina || (dbt && dbt.nomina));
-      applyDebtDelta(t.debtId, -t.monto);
-    }
-    data.movs.push(payload);
-  });
+$('#fixDelete').addEventListener('click', () => {
+  const t = data.fixed.find(x => x.id === editingFixedId);
+  if (!t || !confirm(`¿Quitar "${t.nombre}" de tu lista? Lo que ya anotaste con ella no se borra.`)) return;
+  data.fixed = data.fixed.filter(x => x.id !== editingFixedId);
+  editingFixedId = null;
   save();
-  // Jump to the financial period where the movements landed
-  currentMonth = fp.ym;
-  if (currentQ !== 'all') currentQ = fp.q;
-  $('#applyOverlay').classList.remove('open');
+  $('#fixOverlay').classList.remove('open');
   render();
 });
 
@@ -1268,7 +1451,7 @@ function renderDebts(M) {
   const sum = $('#debtSummary'), list = $('#debtList');
   if (data.debts.length === 0) {
     sum.innerHTML = '';
-    list.innerHTML = `<div class="empty"><span class="big-ico">🙌</span>No has registrado deudas.<br>Si no tienes, ¡genial! Si tienes, anótalas: verlas claras es el primer paso para salir de ellas.</div>`;
+    list.innerHTML = `<div class="card"><div class="empty"><span class="big-ico">🙌</span>No tienes deudas anotadas.<br>Si no tienes, ¡genial! Si tienes, anótalas: verlas claras es el primer paso para salir de ellas.</div></div>`;
     return;
   }
   const tot = totalDebt(), pay = totalDebtPay();
@@ -1277,33 +1460,44 @@ function renderDebts(M) {
   const paidMonth = data.movs
     .filter(m => m.debtId && finPeriod(m.fecha).ym === currentMonth)
     .reduce((s, m) => s + m.monto, 0);
-  sum.innerHTML = `<div class="debt-total">
-    <div class="lbl">DEBES EN TOTAL</div>
-    <div class="val">${fmt(tot)}</div>
-    <div class="cuota">Pagas ~${fmt(pay)} al mes en cuotas${pct !== null ? ` — el ${pct}% de tus ingresos del mes` : ''}.${paidMonth > 0 ? ` Este mes ya has abonado ${fmt(paidMonth)}. 💪` : ''}</div>
+  sum.innerHTML = `<div class="card" style="background:var(--violet-soft);text-align:center">
+    <div style="color:var(--violet);font-weight:700;font-size:16px">${tot > 0 ? 'Debes en total' : '¡No debes nada!'}</div>
+    <div style="font-size:38px;font-weight:800;color:var(--violet);letter-spacing:-.5px">${fmt(tot)}</div>
+    <div style="font-size:15px;color:var(--muted)">${paidMonth > 0 ? `Este mes ya pagaste ${fmt(paidMonth)} 💪` : 'Anota cada pago y verás cómo baja.'}</div>
+    ${pct !== null && pay > 0 ? `<div style="font-size:14px;margin-top:8px">Tus cuotas son el <b>${pct}%</b> de lo que te entra al mes ${pct > 30 ? '⚠️ (lo sano es menos del 30%)' : '👍'}</div>` : ''}
   </div>`;
+  // The most expensive one (only worth pointing out when there's more than one)
+  const open = data.debts.filter(d => d.saldo > 0);
+  const worst = open.length > 1 && open.some(d => d.tasa)
+    ? [...open].sort((a, b) => (b.tasa || 0) - (a.tasa || 0))[0] : null;
   list.innerHTML = data.debts.map(d => {
+    const paidAll = data.movs.filter(m => m.debtId === d.id).reduce((s, m) => s + m.monto, 0);
+    const pctPaid = d.saldo === 0 ? 100 : Math.round((paidAll / (d.saldo + paidAll)) * 100);
     const months = payoffMonths(d);
-    const paid = data.movs
-      .filter(m => m.debtId === d.id && finPeriod(m.fecha).ym === currentMonth)
-      .reduce((s, m) => s + m.monto, 0);
-    return `<div class="debt-card">
-      <div class="head"><span class="n">💳 ${esc(d.nombre)}</span>
-        <span>
-          <button class="edit" data-editdebt="${d.id}" aria-label="Editar">✏️</button>
-          <button class="del" data-deldebt="${d.id}" aria-label="Eliminar">✕</button>
-        </span></div>
-      <div class="meta">
-        ${d.saldo === 0
-          ? `<span style="color:var(--green);font-weight:700">🎉 ¡Deuda saldada! Ya puedes eliminarla.</span>`
-          : `<span>Debes: <b>${fmt(d.saldo)}</b></span>
-        <span>Cuota aprox.: <b>${fmt(d.cuota || 0)}/mes</b></span>`}
-        ${paid > 0 ? `<span>Abonaste este mes: <b style="color:var(--green)">${fmt(paid)}</b></span>` : ''}
-        ${d.tasa && d.saldo > 0 ? `<span>Interés: <b>${d.tasa}% mensual</b></span>` : ''}
+    const facts = [
+      d.cuota ? `Pagas ~${fmt(d.cuota)} al mes` : '',
+      d.tasa ? `${String(d.tasa).replace('.', ',')}% de interés al mes` : '',
+      d.nomina ? '🏢 te la descuentan del sueldo' : ''
+    ].filter(Boolean).join(' · ');
+    let body;
+    if (d.saldo === 0) {
+      body = `<div class="prog"><i style="width:100%"></i></div>
+        <p style="font-size:17px;font-weight:700;color:var(--green)">🎉 ¡La pagaste toda! Ya puedes borrarla desde "Cambiar datos".</p>`;
+    } else {
+      const end = months && months !== Infinity ? shiftMonth(today().slice(0, 7), months) : null;
+      body = `<div style="font-size:14px;color:var(--muted)">${paidAll > 0 ? `Llevas pagado el ${pctPaid}%` : 'Cuando anotes pagos, aquí verás cómo avanza'}</div>
+        <div class="prog"><i style="width:${pctPaid}%"></i></div>
+        <div style="font-size:17px">Te falta <b>${fmt(d.saldo)}</b></div>
+        ${facts ? `<div class="facts">${facts}</div>` : ''}
+        ${worst && worst.id === d.id ? `<div class="insight bad" style="margin:12px 0 0"><span class="ico">⚠️</span><p>Esta es la que <b>más intereses</b> te cobra. Si te sobra plata, abónale a esta primero.</p></div>` : ''}
         ${months === Infinity
-          ? `<span style="color:var(--red);font-weight:600">⚠️ Con esta cuota la deuda no baja: los intereses (~${fmt(d.saldo * d.tasa / 100)} al mes) se comen todo el pago. Si puedes, abona más.</span>`
-          : months ? `<span>A este ritmo: <b>~${months} meses</b>${d.tasa ? ' (ya con intereses)' : ' (si cobra intereses, serán más)'}</span>` : ''}
-      </div>
+          ? `<div class="insight bad" style="margin:12px 0 0"><span class="ico">⚠️</span><p>Con esta cuota la deuda <b>no baja</b>: los intereses (~${fmt(d.saldo * d.tasa / 100)} al mes) se comen todo el pago. Si puedes, abona más.</p></div>`
+          : end ? `<div class="facts">📅 Terminas de pagarla en <b>~${months} ${months === 1 ? 'mes' : 'meses'}</b> (por ahí en ${MESES[+end.slice(5, 7) - 1].toLowerCase()} de ${end.slice(0, 4)})${d.tasa ? '' : ', si no cobra intereses'}</div>` : ''}
+        <button class="btn soft full" data-paydebt="${d.id}" style="margin-top:12px">💳 Anotar un pago</button>`;
+    }
+    return `<div class="card debt">
+      <div class="head"><h3 class="big">💳 ${esc(d.nombre)}</h3><button class="linkbtn" data-editdebt="${d.id}">Cambiar datos</button></div>
+      ${body}
     </div>`;
   }).join('');
 }
@@ -1511,10 +1705,20 @@ function openMov(mov, preset, tipo) {
   $('#movDate').value = src.fecha || periodDefaultDate();
   $('#dateField').style.display = mov ? 'block' : 'none';
   $('#movTipoToggle').style.display = mov ? 'flex' : 'none';
+  $('#movDelete').style.display = mov ? 'block' : 'none';
   $('#movOverlay').classList.add('open');
   showStep(src.tipo || tipo ? 1 : 0);
 }
 $('#fab').addEventListener('click', () => openMov(null));
+$('#movDelete').addEventListener('click', () => {
+  const mov = data.movs.find(m => m.id === editingMovId);
+  if (!mov) return;
+  const extra = mov.debtId ? '\n\nEra un pago de deuda: la deuda vuelve a subir en ese valor.' : '';
+  if (!confirm('¿Borrar este registro? Solo se borra este, lo demás queda igual.' + extra)) return;
+  editingMovId = null;
+  $('#movOverlay').classList.remove('open');
+  deleteMov(mov.id);
+});
 $('#movSave').addEventListener('click', () => {
   if (!movCat) { $('#m2Msg').textContent = '⚠️ Toca una de las opciones de arriba'; return; }
   const monto = movAmount;
@@ -1551,7 +1755,8 @@ $('#movSave').addEventListener('click', () => {
 /* ---------- Deuda modal ---------- */
 function openDebt(debt) {
   editingDebtId = debt ? debt.id : null;
-  $('#debtTitle').textContent = debt ? 'Editar deuda' : 'Agregar una deuda';
+  $('#debtTitle').textContent = debt ? 'Cambiar datos de la deuda' : 'Agregar una deuda';
+  $('#debtDelete').style.display = debt ? 'block' : 'none';
   $('#dName').value = debt ? debt.nombre : '';
   $('#dBal').value = debt ? String(debt.saldo) : '';
   $('#dPay').value = debt && debt.cuota ? String(debt.cuota) : '';
@@ -1563,6 +1768,16 @@ function openDebt(debt) {
 }
 $('#addDebtBtn').addEventListener('click', () => openDebt(null));
 $('#debtCancel').addEventListener('click', () => $('#debtOverlay').classList.remove('open'));
+$('#debtDelete').addEventListener('click', () => {
+  const d = data.debts.find(x => x.id === editingDebtId);
+  if (!d || !confirm(`¿Borrar la deuda "${d.nombre}"? Los pagos que ya anotaste se quedan en tu historial.`)) return;
+  data.debts = data.debts.filter(x => x.id !== d.id);
+  data.fixed.forEach(t => { if (t.debtId === d.id) t.debtId = null; });
+  editingDebtId = null;
+  save();
+  $('#debtOverlay').classList.remove('open');
+  render();
+});
 $('#debtSave').addEventListener('click', () => {
   const nombre = $('#dName').value.trim();
   const saldo = numVal('#dBal');
@@ -1585,25 +1800,13 @@ $('#debtSave').addEventListener('click', () => {
   render();
 });
 
-/* ---------- Delete (event delegation) ---------- */
+/* ---------- Toques en las listas (event delegation) ---------- */
 document.body.addEventListener('click', e => {
-  const af = e.target.closest('[data-applyfix]');
-  if (af) {
-    const t = data.fixed.find(x => x.id === af.dataset.applyfix);
-    if (t) openMov(null, { tipo:t.tipo || 'gasto', cat:t.cat, monto:t.monto, desc:t.nombre, fixedId:t.id, debtId:t.debtId || '' });
-    return;
-  }
   const ef = e.target.closest('[data-editfix]');
   if (ef) {
     const t = data.fixed.find(x => x.id === ef.dataset.editfix);
     if (t) openFixed(t);
     return;
-  }
-  const df = e.target.closest('[data-delfix]');
-  if (df) {
-    if (!confirm('¿Eliminar este gasto fijo de la lista? Los movimientos que ya registraste con él NO se borran.')) return;
-    data.fixed = data.fixed.filter(t => t.id !== df.dataset.delfix);
-    save(); render(); return;
   }
   const em = e.target.closest('[data-editmov]');
   if (em) {
@@ -1617,25 +1820,15 @@ document.body.addEventListener('click', e => {
     if (debt) openDebt(debt);
     return;
   }
-  const dm = e.target.closest('[data-delmov]');
-  if (dm) {
-    const mov = data.movs.find(m => m.id === dm.dataset.delmov);
-    const extra = mov && mov.debtId ? '\n\nEste era un pago de deuda: el saldo de esa deuda volverá a subir.' : '';
-    if (!confirm('¿Eliminar este movimiento? Solo se borra este, lo demás queda intacto.' + extra)) return;
-    if (mov && mov.debtId) applyDebtDelta(mov.debtId, +mov.monto);
-    data.movs = data.movs.filter(m => m.id !== dm.dataset.delmov);
-    save(); render(); return;
-  }
-  const dd = e.target.closest('[data-deldebt]');
-  if (dd) {
-    if (!confirm('¿Eliminar esta deuda? Solo se borra esta, lo demás queda intacto.')) return;
-    data.debts = data.debts.filter(d => d.id !== dd.dataset.deldebt);
-    save(); render();
+  const pd = e.target.closest('[data-paydebt]');
+  if (pd) {
+    const d = data.debts.find(x => x.id === pd.dataset.paydebt);
+    if (d) openMov(null, { tipo: 'gasto', cat: 'deudapago', debtId: d.id, monto: Math.min(d.cuota || 0, d.saldo) });
   }
 });
 
 /* Close modals tapping outside */
-['movOverlay', 'debtOverlay', 'fixOverlay', 'applyOverlay', 'setOverlay'].forEach(id => {
+['movOverlay', 'debtOverlay', 'fixOverlay', 'setOverlay'].forEach(id => {
   $('#' + id).addEventListener('click', e => {
     if (e.target.id === id) $('#' + id).classList.remove('open');
   });
@@ -1659,7 +1852,15 @@ const INSTALL_STEPS = `<ol style="font-size:14px;margin:8px 0 0 20px;line-height
   <li>Toca <b>"Agregar"</b>. ¡Listo! Ábrela siempre desde su ícono 💰.</li>
 </ol>`;
 
+$('#sName').addEventListener('change', e => { data.settings.name = e.target.value.trim(); save(); render(); });
+$('#sPay').addEventListener('change', e => {
+  data.settings.pay = e.target.value;
+  if (data.settings.pay === 'quincenal') currentQ = finPeriod(today()).q;
+  save(); render();
+});
 function renderSettings() {
+  $('#sName').value = data.settings.name || '';
+  $('#sPay').value = data.settings.pay || 'mensual';
   $('#installBox').innerHTML = isStandalone()
     ? `<div class="insight good" style="margin:0"><span class="ico">✅</span><p><b>Mi Plata está instalada</b> en este celular. Ábrela siempre desde su ícono.</p></div>`
     : `<div class="insight info" style="margin:0;display:block"><p><b>📲 Instálala en tu ${isIOS() ? 'iPhone' : 'celular'}</b> para tenerla como una app, usarla sin internet y que el teléfono no borre tus datos.</p>
@@ -1746,7 +1947,9 @@ $('#restoreFile').addEventListener('change', async e => {
   }
   const when = f.name.match(/\d{4}-\d{2}-\d{2}/);
   if (!confirm(`¿Recuperar esta copia${when ? ' del ' + when[0] : ''}? Tiene ${d.movs.length} movimientos y ${d.debts.length} deudas.\n\nLo que tienes ahora en la app se reemplazará por lo de la copia.`)) return;
-  data = { movs: d.movs, debts: d.debts, prios: d.prios || [], fixed: d.fixed || [] };
+  data = { movs: d.movs, debts: d.debts, prios: d.prios || [], fixed: d.fixed || [],
+    settings: d.settings || { name: '', pay: 'quincenal', onboarded: true } };
+  $('#onb').classList.remove('open');
   save();
   $('#setOverlay').classList.remove('open');
   render();
@@ -1762,9 +1965,11 @@ function exitDemo() {
   $('#demoBanner').style.display = 'none';
   render();
   goTo('resumen');
+  if (!data.settings.onboarded) showOnboarding();
 }
 $('#demoExit').addEventListener('click', exitDemo);
-$('#demoBtn').addEventListener('click', () => {
+$('#demoBtn').addEventListener('click', enterDemo);
+function enterDemo() {
   if (!demoMode) realData = data;
   demoMode = true;
   $('#setOverlay').classList.remove('open');
@@ -1772,10 +1977,10 @@ $('#demoBtn').addEventListener('click', () => {
   const ym = today().slice(0, 7);
   const d = day => `${ym}-${String(day).padStart(2, '0')}`;
   const tcId = uid();
-  const fixArriendo = uid(), fixServicios = uid(), fixCuota = uid();
+  const fixArriendo = uid(), fixServicios = uid(), fixCuota = uid(), fixSueldo = uid();
   data = {
     movs: [
-      { id:uid(), tipo:'ingreso', cat:'salario',  monto:2400000, desc:'Salario del mes',     fecha:d(1) },
+      { id:uid(), tipo:'ingreso', cat:'salario',  monto:2400000, desc:'Mi sueldo',           fecha:d(1), fixedId:fixSueldo },
       { id:uid(), tipo:'ingreso', cat:'freelance',monto:350000,  desc:'Trabajo extra',       fecha:d(12) },
       { id:uid(), tipo:'ahorro',  cat:'ahorrogen',monto:200000,  desc:'Guardado del mes',    fecha:d(2) },
       { id:uid(), tipo:'gasto', cat:'vivienda',  monto:850000, desc:'Arriendo',              fecha:d(2), fixedId:fixArriendo },
@@ -1799,29 +2004,86 @@ $('#demoBtn').addEventListener('click', () => {
       { id:uid(), nombre:'Préstamo personal', saldo:400000, cuota:100000, tasa:null }
     ],
     fixed: [
-      { id:fixArriendo,  nombre:'Arriendo',              monto:850000, tipo:'gasto', cat:'vivienda' },
-      { id:fixServicios, nombre:'Luz, agua e internet',  monto:180000, tipo:'gasto', cat:'servicios' },
-      { id:fixCuota,     nombre:'Cuota tarjeta',         monto:220000, tipo:'gasto', cat:'deudapago', debtId:tcId },
-      { id:uid(),        nombre:'Ahorro quincenal',      monto:100000, tipo:'ahorro', cat:'ahorrogen' }
+      { id:fixSueldo,    nombre:'Mi sueldo',             monto:2400000, tipo:'ingreso', cat:'salario',  freq:'mensual' },
+      { id:fixArriendo,  nombre:'Arriendo',              monto:850000, tipo:'gasto', cat:'vivienda',    freq:'mensual' },
+      { id:fixServicios, nombre:'Luz, agua e internet',  monto:180000, tipo:'gasto', cat:'servicios',   freq:'mensual' },
+      { id:fixCuota,     nombre:'Cuota tarjeta',         monto:220000, tipo:'gasto', cat:'deudapago', debtId:tcId, freq:'mensual' },
+      { id:uid(),        nombre:'Ahorro',                monto:100000, tipo:'ahorro', cat:'ahorrogen',  freq:'quincenal' }
     ],
-    prios: ['deudas', 'ahorro']
+    prios: ['deudas', 'ahorro'],
+    settings: { name: '', pay: 'mensual', onboarded: true }
   };
   save();
   currentMonth = ym;
   currentQ = 'all';
   render();
   goTo('resumen');
+}
+
+/* ---------- Bienvenida (primera vez) ---------- */
+let onbPay = null, onbDebt = null;
+function oStep(n) {
+  [1, 2, 3, 4].forEach(i => { $('#o' + i).style.display = i === n ? 'block' : 'none'; });
+  $('#onb').scrollTop = 0;
+  if (n === 3) $('#o3Q').textContent = onbPay === 'quincenal' ? '¿Cuánto te pagan cada quincena, más o menos?' : '¿Cuánto te pagan al mes, más o menos?';
+}
+function showOnboarding() {
+  onbPay = null; onbDebt = null;
+  $('#oName').value = ''; $('#oIncome').value = ''; $('#oIncomePrev').textContent = '';
+  document.querySelectorAll('#oPay .tile, #oDebt .tile').forEach(b => b.classList.remove('on'));
+  $('#o2Msg').textContent = ''; $('#o4Msg').textContent = '';
+  $('#onb').classList.add('open');
+  oStep(1);
+}
+document.querySelectorAll('[data-ogo]').forEach(b => b.addEventListener('click', () => oStep(+b.dataset.ogo)));
+$('#oPay').addEventListener('click', e => {
+  const b = e.target.closest('[data-pay]');
+  if (!b) return;
+  onbPay = b.dataset.pay;
+  document.querySelectorAll('#oPay .tile').forEach(x => x.classList.toggle('on', x === b));
+  $('#o2Msg').textContent = '';
+});
+$('#o2Next').addEventListener('click', () => {
+  if (!onbPay) { $('#o2Msg').textContent = '⚠️ Toca una de las opciones'; return; }
+  oStep(onbPay === 'varia' ? 4 : 3); // nothing fixed to remind when the pay varies
+});
+$('#o4Back').addEventListener('click', () => oStep(onbPay === 'varia' ? 2 : 3));
+$('#oDebt').addEventListener('click', e => {
+  const b = e.target.closest('[data-odebt]');
+  if (!b) return;
+  onbDebt = b.dataset.odebt;
+  document.querySelectorAll('#oDebt .tile').forEach(x => x.classList.toggle('on', x === b));
+  $('#o4Msg').textContent = '';
+});
+bindMoneyPreview('#oIncome', '#oIncomePrev');
+$('#oDemo').addEventListener('click', () => { $('#onb').classList.remove('open'); enterDemo(); });
+$('#oRestore').addEventListener('click', () => { $('#restoreFile').value = ''; $('#restoreFile').click(); });
+$('#oFinish').addEventListener('click', () => {
+  if (!onbDebt) { $('#o4Msg').textContent = '⚠️ Toca una de las opciones'; return; }
+  data.settings = { name: $('#oName').value.trim(), pay: onbPay, onboarded: true };
+  const income = onbPay === 'varia' ? 0 : numVal('#oIncome');
+  if (income > 0 && !data.fixed.some(t => t.tipo === 'ingreso')) {
+    data.fixed.unshift({ id: uid(), nombre: 'Mi sueldo', monto: income, tipo: 'ingreso', cat: 'salario', freq: onbPay === 'quincenal' ? 'quincenal' : 'mensual' });
+  }
+  currentQ = onbPay === 'quincenal' ? finPeriod(today()).q : 'all';
+  save();
+  $('#onb').classList.remove('open');
+  render();
+  goTo('resumen');
+  if (onbDebt === 'si') openDebt(null);
 });
 
 /* ---------- Wipe ---------- */
 $('#wipeBtn').addEventListener('click', () => {
   if (demoMode) { alert('Ahora estás viendo datos de ejemplo. Sal del ejemplo primero si quieres borrar tu información real.'); return; }
-  if (confirm('¿De verdad quieres borrar TODA la información y empezar de cero? Esto no se puede deshacer.\n\nRecuerda: si solo quieres corregir algo, puedes editar (✏️) o eliminar (✕) cada movimiento o deuda por separado.')) {
-    data = { movs: [], debts: [], prios: [], fixed: [] };
-    store.clear(); save();
-    $('#setOverlay').classList.remove('open');
-    render();
-  }
+  const r = prompt('Esto borra TODA tu información y no se puede deshacer.\n\nSi solo quieres corregir algo, mejor toca ese registro y cámbialo.\n\nPara borrar todo, escribe la palabra BORRAR:');
+  if (r === null) return;
+  if (r.trim().toUpperCase() !== 'BORRAR') { alert('No escribiste BORRAR, así que no se borró nada.'); return; }
+  data = { movs: [], debts: [], prios: [], fixed: [], settings: { name: '', pay: 'mensual', onboarded: false } };
+  store.clear(); save();
+  $('#setOverlay').classList.remove('open');
+  render();
+  showOnboarding();
 });
 
 /* ---------- Init ---------- */
@@ -1845,6 +2107,7 @@ if (jsWarn) jsWarn.remove();
 
 render();
 goTo('resumen');
+if (!data.settings.onboarded) showOnboarding();
 
 // Installed app: work offline and ask the phone not to clear our data
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
