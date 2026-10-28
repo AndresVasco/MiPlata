@@ -372,6 +372,19 @@
   .subrows div{display:flex;justify-content:space-between;font-size:15px;padding:5px 0;color:var(--ink)}
   .subrows div span:first-child{color:var(--muted)}
   .subrows p{font-size:14px;color:var(--muted);padding:4px 0}
+  /* Vencimientos, metas, topes, teclado para formularios */
+  .due{border:2px solid var(--amber-soft)}
+  .due .late{color:var(--red);font-weight:700}
+  .acct .btn.small{flex:none}
+  .prog.teal{background:var(--teal-soft)}
+  .prog.teal i{background:var(--teal)}
+  .meta{padding:12px 0;border-bottom:1px solid var(--line)}
+  .meta:last-of-type{border-bottom:none}
+  .meta .head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:17px}
+  .tope{font-size:13px;color:var(--muted);font-weight:500;margin-top:3px}
+  .tope.warn{color:var(--amber)}.tope.bad{color:var(--red);font-weight:700}
+  .subrows .tl{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding-top:6px}
+  input.amtin{cursor:pointer;background:var(--surface)}
   .col-side{display:none}
   @media(min-width:900px){.col-side{display:block}}
 
@@ -424,6 +437,7 @@
     <!-- ============ VISTA: RESUMEN ============ -->
     <section data-view="resumen" class="active">
       <p class="hello" id="hello" style="display:none"></p>
+      <div id="dueBox"></div>
       <div id="hero" class="hero empty"></div>
 
       <div class="quick">
@@ -445,9 +459,11 @@
         </div>
       </div>
 
+      <div id="metasBox"></div>
+
       <div class="card">
         <h3 class="big">En qué se fue más plata</h3>
-        <p class="sub" style="margin:2px 0 0">Toca una para ver el detalle.</p>
+        <p class="sub" style="margin:2px 0 0">Toca una para ver el detalle o ponerle un tope.</p>
         <div id="riverWrap" style="margin-top:6px"></div>
       </div>
     </section>
@@ -549,6 +565,10 @@
           <button class="btn primary small" id="subNewAdd">Agregar</button>
         </div>
       </div>
+      <div id="movMetaField" style="display:none">
+        <span class="lbl2">¿Para cuál meta?</span>
+        <div class="tiles list" id="movMeta"></div>
+      </div>
       <div id="movDebtField" style="display:none">
         <span class="lbl2">¿Cuál deuda pagaste? Su saldo bajará solo.</span>
         <div class="tiles list" id="movDebt"></div>
@@ -575,12 +595,12 @@
     </div>
     <div class="field">
       <label>¿Cuánto debes en total? (pesos)</label>
-      <input type="text" id="dBal" inputmode="numeric" placeholder="Ej: 1500000">
+      <input type="text" id="dBal" class="amtin" readonly data-q="¿Cuánto debes en total?" placeholder="Toca para escribir el valor">
       <div class="money-preview" id="dBalPrev"></div>
     </div>
     <div class="field">
       <label>¿Cuánto pagas al mes, más o menos? (la cuota puede variar; el saldo real baja con cada pago que registres)</label>
-      <input type="text" id="dPay" inputmode="numeric" placeholder="Ej: 150000">
+      <input type="text" id="dPay" class="amtin" readonly data-q="¿Cuánto pagas al mes, más o menos?" placeholder="Toca para escribir el valor">
       <div class="money-preview" id="dPayPrev"></div>
     </div>
     <div class="field">
@@ -614,7 +634,7 @@
     </div>
     <div class="field">
       <label>¿Cuánto suele ser? (si un mes cambia, lo corriges ese mes)</label>
-      <input type="text" id="fAmt" inputmode="numeric" placeholder="Ej: 850000">
+      <input type="text" id="fAmt" class="amtin" readonly data-q="¿Cuánto suele ser?" placeholder="Toca para escribir el valor">
       <div class="money-preview" id="fAmtPrev"></div>
     </div>
     <div class="field">
@@ -623,6 +643,10 @@
         <button class="plain" data-freq="mensual">Una vez al mes</button>
         <button class="plain" data-freq="quincenal">Cada quincena</button>
       </div>
+    </div>
+    <div class="field" id="fDiaField">
+      <label id="fDiaLbl">¿Qué día del mes vence? (opcional)</label>
+      <select id="fDia"><option value="">No tiene un día fijo</option><option value="1">El 1</option><option value="2">El 2</option><option value="3">El 3</option><option value="4">El 4</option><option value="5">El 5</option><option value="6">El 6</option><option value="7">El 7</option><option value="8">El 8</option><option value="9">El 9</option><option value="10">El 10</option><option value="11">El 11</option><option value="12">El 12</option><option value="13">El 13</option><option value="14">El 14</option><option value="15">El 15</option><option value="16">El 16</option><option value="17">El 17</option><option value="18">El 18</option><option value="19">El 19</option><option value="20">El 20</option><option value="21">El 21</option><option value="22">El 22</option><option value="23">El 23</option><option value="24">El 24</option><option value="25">El 25</option><option value="26">El 26</option><option value="27">El 27</option><option value="28">El 28</option><option value="29">El 29</option><option value="30">El 30</option><option value="31">El 31</option></select>
     </div>
     <div class="field">
       <label>¿De qué tipo es?</label>
@@ -680,7 +704,7 @@
       <div class="q" id="o3Q">¿Cuánto te pagan, más o menos?</div>
       <p class="lead">Así te recordamos tu pago en "Mis cuentas". Si no sabes, déjalo vacío.</p>
       <div class="field">
-        <input type="text" id="oIncome" inputmode="numeric" placeholder="Ej: 1500000">
+        <input type="text" id="oIncome" class="amtin" readonly data-q="¿Cuánto te pagan, más o menos?" placeholder="Toca para escribir el valor">
         <div class="money-preview" id="oIncomePrev" style="font-size:15px"></div>
       </div>
       <div class="actions" style="display:flex;gap:10px;margin-top:10px">
@@ -703,6 +727,45 @@
         <button class="btn primary" id="oFinish" style="flex:1">✓ Listo</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ============ TECLADO PARA VALORES (deudas, cuentas, metas, topes) ============ -->
+<div class="overlay" id="amtOverlay" style="z-index:95">
+  <div class="sheet">
+    <div class="q" id="kpTitle"></div>
+    <div class="amt-box ingreso"><div class="v" id="kpShow">$0</div><small id="kpWords"></small></div>
+    <div class="keys" id="kpKeys">
+      <button data-kk="1">1</button><button data-kk="2">2</button><button data-kk="3">3</button>
+      <button data-kk="4">4</button><button data-kk="5">5</button><button data-kk="6">6</button>
+      <button data-kk="7">7</button><button data-kk="8">8</button><button data-kk="9">9</button>
+      <button data-kk="000">000</button><button data-kk="0">0</button><button data-kk="back" aria-label="Borrar">⌫</button>
+    </div>
+    <div class="actions">
+      <button class="btn soft" id="kpCancel">Cancelar</button>
+      <button class="btn primary" id="kpOk">Listo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: META DE AHORRO ============ -->
+<div class="overlay" id="metaOverlay" style="z-index:65">
+  <div class="sheet">
+    <h3 id="metaTitle">Nueva meta</h3>
+    <div class="field">
+      <label>¿Para qué estás ahorrando?</label>
+      <input type="text" id="mName" placeholder="Ej: Moto, viaje, celular nuevo…" maxlength="40">
+    </div>
+    <div class="field">
+      <label>¿Cuánto necesitas en total?</label>
+      <input type="text" id="mGoal" class="amtin" readonly data-q="¿Cuánto necesitas en total?" placeholder="Toca para escribir el valor">
+      <div class="money-preview" id="mGoalPrev"></div>
+    </div>
+    <div class="actions">
+      <button class="btn soft" id="metaCancel">Cancelar</button>
+      <button class="btn primary" id="metaSave">Guardar</button>
+    </div>
+    <button class="btn danger full" id="metaDelete" style="display:none;margin-top:10px">🗑️ Borrar esta meta</button>
   </div>
 </div>
 
@@ -746,7 +809,7 @@
     <div class="actions">
       <button class="btn soft" id="setClose">Cerrar</button>
     </div>
-    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:12px">Mi Plata · versión 4.4</p>
+    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:12px">Mi Plata · versión 4.5</p>
   </div>
 </div>
 
@@ -880,6 +943,8 @@ const today = () => {
 let data = store.get('miplata_data', { movs: [], debts: [], prios: [], fixed: [] });
 if (!data.prios) data.prios = [];
 if (!data.fixed) data.fixed = [];
+if (!data.metas) data.metas = [];
+if (!data.topes) data.topes = {};
 delete data.waIgnored;
 // Older installs already have data: skip the welcome and keep the quincena view they knew
 if (!data.settings) data.settings = (data.movs.length || data.debts.length || data.fixed.length)
@@ -932,10 +997,12 @@ function renderMonthNav() {
 // Financial fortnight model: money from the 30th/31st finances days 1-14 of the
 // NEXT month (Q1); money from the 15th/16th finances days 15-29 (Q2).
 // So: day 30-31 → Q1 of next month · day 15-29 → Q2 · day 1-14 → Q1
+// In February the end-of-month pay day is the 28th/29th, so its last day counts as "the 30th".
 function finPeriod(fecha) {
   const day = parseInt(fecha.slice(8, 10), 10);
   let y = parseInt(fecha.slice(0, 4), 10), m = parseInt(fecha.slice(5, 7), 10);
-  if (day >= 30) {
+  const lastDay = new Date(y, m, 0).getDate();
+  if (day >= Math.min(30, lastDay)) {
     m++; if (m > 12) { m = 1; y++; }
     return { ym: y + '-' + String(m).padStart(2, '0'), q: 'q1' };
   }
@@ -1004,7 +1071,9 @@ function render() {
   renderMonthNav();
   renderPeriodSeg();
   const M = monthData();
+  renderDue();
   renderHero(M);
+  renderMetas();
   renderRiver(M);
   renderInsights(M);
   renderPrio(M);
@@ -1054,6 +1123,11 @@ function renderHero(M) {
 
 /* ---------- Río de plata ---------- */
 let showAllCats = false, openCat = null;
+const catKey = c => c === 'servicios' ? 'vivienda' : c;
+// Spending of a category in a whole financial month (topes are monthly, even when viewing a quincena)
+const monthCatSpend = (ym, cat) => data.movs
+  .filter(m => m.tipo === 'gasto' && finPeriod(m.fecha).ym === ym && catKey(m.cat) === cat)
+  .reduce((s, m) => s + m.monto, 0);
 function renderRiver(M) {
   const wrap = $('#riverWrap');
   if (M.totOut === 0) {
@@ -1063,6 +1137,7 @@ function renderRiver(M) {
   const max = M.cats[0].amt;
   const rows = (showAllCats ? M.cats : M.cats.slice(0, 3)).map(c => {
     const open = openCat === c.id;
+    const tope = data.topes[c.id] || 0, spentMonth = tope ? monthCatSpend(currentMonth, c.id) : 0;
     let detail = '';
     if (open) {
       const by = {};
@@ -1070,11 +1145,20 @@ function renderRiver(M) {
         .forEach(m => { const k = subOf(m) || 'Sin detalle'; by[k] = (by[k] || 0) + m.monto; });
       const list = Object.entries(by).sort((a, b) => (a[0] === 'Sin detalle') - (b[0] === 'Sin detalle') || b[1] - a[1]);
       detail = `<div class="subrows">${list.map(([k, v]) => `<div><span>${esc(k)}</span><b>${fmt(v)}</b></div>`).join('')}
-        ${list.length === 1 && list[0][0] === 'Sin detalle' ? `<p>💡 La próxima vez que anotes un gasto aquí, elige qué fue exactamente y verás el desglose.</p>` : ''}</div>`;
+        ${list.length === 1 && list[0][0] === 'Sin detalle' ? `<p>💡 La próxima vez que anotes un gasto aquí, elige qué fue exactamente y verás el desglose.</p>` : ''}
+        <div class="tl">${tope
+          ? `<span>🎯 Tope del mes: <b>${fmt(tope)}</b></span><button class="linkbtn" data-settope="${c.id}">Cambiar</button><button class="linkbtn" data-deltope="${c.id}" style="color:var(--muted)">Quitar</button>`
+          : `<button class="linkbtn" data-settope="${c.id}">🎯 Ponerle un tope a ${esc(c.name)}</button>`}</div></div>`;
+    }
+    let bar = `<div class="mini"><i style="width:${(c.amt / max) * 100}%;background:${c.color}"></i></div>`;
+    if (tope) {
+      const pct = Math.round((spentMonth / tope) * 100), lvl = pct > 100 ? 'bad' : pct >= 80 ? 'warn' : '';
+      bar = `<div class="mini"><i style="width:${Math.min(100, pct)}%;background:${lvl === 'bad' ? 'var(--red)' : lvl ? 'var(--amber)' : 'var(--green)'}"></i></div>
+        <div class="tope ${lvl}">${fmt(spentMonth)} de ${fmt(tope)} este mes${lvl === 'bad' ? ' · te pasaste' : ''}</div>`;
     }
     return `<div class="catrow ${open ? 'open' : ''}" data-opencat="${c.id}">
       <span class="ic">${c.emoji}</span>
-      <div class="n">${esc(c.name)}<div class="mini"><i style="width:${(c.amt / max) * 100}%;background:${c.color}"></i></div></div>
+      <div class="n">${esc(c.name)}${bar}</div>
       <span class="m">${fmt(c.amt)}</span><span class="go">›</span>
     </div>${detail}`;
   }).join('');
@@ -1084,6 +1168,17 @@ function renderRiver(M) {
 }
 $('#riverWrap').addEventListener('click', e => {
   if (e.target.closest('[data-allcats]')) { showAllCats = !showAllCats; renderRiver(monthData()); return; }
+  const st = e.target.closest('[data-settope]');
+  if (st) {
+    const cat = st.dataset.settope;
+    askAmount(`¿Cuánto es lo máximo que quieres gastar en ${catById(cat).name} cada mes?`, data.topes[cat] || 0, n => {
+      if (n) data.topes[cat] = n; else delete data.topes[cat];
+      save(); render();
+    });
+    return;
+  }
+  const dt = e.target.closest('[data-deltope]');
+  if (dt) { delete data.topes[dt.dataset.deltope]; save(); render(); return; }
   const r = e.target.closest('[data-opencat]');
   if (r) { openCat = openCat === r.dataset.opencat ? null : r.dataset.opencat; renderRiver(monthData()); }
 });
@@ -1156,6 +1251,38 @@ function renderInsights(M) {
     const allAho = data.movs.filter(m => m.tipo === 'ahorro').reduce((s, m) => s + m.monto, 0);
     add('good', '🐷', `Guardaste <b>${fmt(M.totAho)}</b> ${PW()}. Tu ahorro acumulado registrado ya va en <b>${fmt(allAho)}</b>. Eso es plata trabajando para ti.`);
   }
+
+  // 6b. Topes por categoría
+  Object.entries(data.topes).forEach(([cat, tope]) => {
+    const spent = monthCatSpend(currentMonth, cat), c = catById(cat), pct = Math.round((spent / tope) * 100);
+    if (pct > 100) add('bad', '🎯', `Te pasaste del tope de <b>${esc(c.name)}</b>: llevas ${fmt(spent)} de ${fmt(tope)} este mes.`);
+    else if (pct >= 80) add('warn', '🎯', `Ya usaste el <b>${pct}%</b> de tu tope de <b>${esc(c.name)}</b> (${fmt(spent)} de ${fmt(tope)}). Te quedan ${fmt(tope - spent)} para lo que falta del mes.`);
+  });
+
+  // 6c. Comparación con el mes pasado (a esta misma altura del mes, si es el mes actual)
+  (() => {
+    const prevYm = shiftMonth(currentMonth, -1);
+    const isNow = currentMonth === finPeriod(today()).ym;
+    const idx = f => finPeriod(f).ym === f.slice(0, 7) ? +f.slice(8, 10) : 0; // day within the financial month
+    const cut = isNow ? idx(today()) : 99;
+    const sumBy = ym => {
+      const by = {};
+      data.movs.filter(m => m.tipo === 'gasto' && finPeriod(m.fecha).ym === ym && idx(m.fecha) <= cut)
+        .forEach(m => { const k = catKey(m.cat); by[k] = (by[k] || 0) + m.monto; });
+      return by;
+    };
+    const prev = sumBy(prevYm);
+    if (!Object.keys(prev).length) return;
+    const cur = sumBy(currentMonth), mes = MESES[+prevYm.slice(5, 7) - 1].toLowerCase();
+    const when = isNow ? ' a esta misma fecha' : '';
+    const diffs = [...new Set([...Object.keys(prev), ...Object.keys(cur)])]
+      .map(k => ({ k, p: prev[k] || 0, c: cur[k] || 0 }))
+      .filter(x => x.k !== 'deudapago');
+    const drop = diffs.filter(x => x.p >= 20000 && x.p - x.c >= Math.max(20000, x.p * 0.2)).sort((a, b) => (b.p - b.c) - (a.p - a.c))[0];
+    const rise = diffs.filter(x => x.p > 0 && x.c - x.p >= Math.max(30000, x.p * 0.25)).sort((a, b) => (b.c - b.p) - (a.c - a.p))[0];
+    if (drop) add('good', '👏', `Vas <b>${fmt(drop.p - drop.c)} por debajo</b> de ${mes} en <b>${esc(catById(drop.k).name)}</b>${when}. ¡Muy bien!`);
+    if (rise) add('warn', '📈', `Vas gastando <b>${fmt(rise.c - rise.p)} más</b> que en ${mes} en <b>${esc(catById(rise.k).name)}</b>${when}.`);
+  })();
 
   // 7. Sobrante aún no guardado → oportunidad de ahorro
   if (M.disponible > 0 && M.totIn > 0) {
@@ -1331,6 +1458,10 @@ function renderFixed(M) {
     return;
   }
   let done = 0, total = 0;
+  // People who had accounts before frequencies existed: ask them once to check
+  const freqNote = !data.settings.freqChecked && data.fixed.some(t => !t.freq)
+    ? `<div class="insight info" style="display:block;margin-bottom:6px"><p>💡 Estas cuentas quedaron como <b>una vez al mes</b>. Si alguna la pagas o recibes <b>cada quincena</b>, toca su nombre y cámbiala.</p>
+       <button class="btn primary small" data-freqok style="margin-top:8px">Ya las revisé</button></div>` : '';
   const doneWord = t => t.tipo === 'ingreso' ? 'Recibido' : t.tipo === 'ahorro' ? 'Guardado' : 'Pagado';
   const todoWord = t => t.tipo === 'ingreso' ? 'cuando te paguen' : t.tipo === 'ahorro' ? 'cuando lo guardes' : 'cuando lo pagues';
   box.innerHTML = data.fixed.map(t => {
@@ -1346,7 +1477,9 @@ function renderFixed(M) {
     } else {
       total += 1; if (st.m) done++;
       checks = `<button class="chk ${st.m ? 'ok' : ''}" data-chk="${t.id}" aria-label="Marcar ${esc(t.nombre)}">${st.m ? '✓' : ''}</button>`;
-      note = st.m ? `${doneWord(t)} · ${dayLabel(st.m.fecha)}` : 'Pendiente · toca el círculo ' + todoWord(t);
+      note = st.m ? `${doneWord(t)} · ${dayLabel(st.m.fecha)}`
+        : t.dia ? `${t.tipo === 'ingreso' ? 'Te pagan' : 'Vence'} el ${t.dia} · toca el círculo ${todoWord(t)}`
+        : 'Pendiente · toca el círculo ' + todoWord(t);
       amt = st.m ? st.m.monto : t.monto;
     }
     return `<div class="acct">
@@ -1355,6 +1488,7 @@ function renderFixed(M) {
       <span class="m ${cls}">${fmt(amt)}</span>
     </div>`;
   }).join('');
+  if (freqNote) box.innerHTML = freqNote + box.innerHTML;
   $('#fixedSub').textContent = done === total
     ? `✓ ¡Todo al día en ${MESES[+currentMonth.slice(5, 7) - 1].toLowerCase()}! Toca un nombre para cambiarlo.`
     : `Llevas ${done} de ${total}. Toca el círculo cuando ya esté hecho, o el nombre para cambiarlo.`;
@@ -1387,6 +1521,123 @@ function deleteMov(id) {
   save(); render();
 }
 
+/* ---------- Metas de ahorro ---------- */
+const metaSaved = id => data.movs.filter(m => m.tipo === 'ahorro' && m.metaId === id).reduce((s, m) => s + m.monto, 0);
+function metaForecast(meta) {
+  const movs = data.movs.filter(m => m.tipo === 'ahorro' && m.metaId === meta.id);
+  const saved = movs.reduce((s, m) => s + m.monto, 0);
+  if (saved >= meta.objetivo) return '🎉 ¡Lo lograste! Ya tienes lo que necesitabas.';
+  if (!movs.length) return 'Cuando guardes para esta meta, aquí verás cuándo la completas.';
+  // Average saved per month since the first contribution
+  const first = movs.map(m => m.fecha).sort()[0].slice(0, 7), now = today().slice(0, 7);
+  const span = Math.max(1, (+now.slice(0, 4) - +first.slice(0, 4)) * 12 + (+now.slice(5, 7) - +first.slice(5, 7)) + 1);
+  const months = Math.ceil((meta.objetivo - saved) / (saved / span));
+  const end = shiftMonth(now, months);
+  return `📅 Al ritmo que vas, la completas en <b>~${months} ${months === 1 ? 'mes' : 'meses'}</b> (por ahí en ${MESES[+end.slice(5, 7) - 1].toLowerCase()} de ${end.slice(0, 4)}).`;
+}
+function renderMetas() {
+  const box = $('#metasBox');
+  if (!data.metas.length) {
+    box.innerHTML = data.movs.length
+      ? `<div class="card"><button class="linkbtn" data-metanew style="padding:0;text-decoration:none;font-size:16px">🎯 ¿Estás ahorrando para algo? Crea una meta →</button></div>` : '';
+    return;
+  }
+  box.innerHTML = `<div class="card"><h3 class="big">🎯 Tus metas</h3>
+    ${data.metas.map(m => {
+      const saved = metaSaved(m.id), pct = Math.min(100, Math.round((saved / m.objetivo) * 100));
+      return `<div class="meta">
+        <div class="head"><b>${esc(m.nombre)}</b><button class="linkbtn" data-editmeta="${m.id}">Cambiar</button></div>
+        <div style="font-size:15px">${fmt(saved)} de ${fmt(m.objetivo)} · <b>${pct}%</b></div>
+        <div class="prog teal"><i style="width:${pct}%"></i></div>
+        <div class="facts" style="margin-top:2px">${metaForecast(m)}</div>
+        ${saved < m.objetivo ? `<button class="btn soft full" data-metasave="${m.id}" style="margin-top:10px">🐷 Guardar para esta meta</button>` : ''}
+      </div>`;
+    }).join('')}
+    <button class="linkbtn" data-metanew>＋ Crear otra meta</button></div>`;
+}
+$('#metasBox').addEventListener('click', e => {
+  if (e.target.closest('[data-metanew]')) { openMeta(null); return; }
+  const ed = e.target.closest('[data-editmeta]');
+  if (ed) { openMeta(data.metas.find(m => m.id === ed.dataset.editmeta)); return; }
+  const sv = e.target.closest('[data-metasave]');
+  if (sv) openMov(null, { tipo: 'ahorro', cat: 'meta', metaId: sv.dataset.metasave });
+});
+let editingMetaId = null, metaCb = null;
+function openMeta(meta, cb) {
+  editingMetaId = meta ? meta.id : null; metaCb = cb || null;
+  $('#metaTitle').textContent = meta ? 'Cambiar esta meta' : 'Nueva meta de ahorro';
+  $('#mName').value = meta ? meta.nombre : '';
+  $('#mGoal').value = meta ? fmt(meta.objetivo) : '';
+  $('#mGoalPrev').textContent = meta ? moneyWords(meta.objetivo) : '';
+  $('#metaDelete').style.display = meta ? 'block' : 'none';
+  $('#metaOverlay').classList.add('open');
+}
+$('#metaCancel').addEventListener('click', () => $('#metaOverlay').classList.remove('open'));
+$('#metaSave').addEventListener('click', () => {
+  const nombre = $('#mName').value.trim(), objetivo = numVal('#mGoal');
+  if (!nombre || !objetivo) { $('#mGoalPrev').textContent = '⚠️ Falta el nombre o el valor'; return; }
+  let id = editingMetaId;
+  if (id) Object.assign(data.metas.find(m => m.id === id), { nombre, objetivo });
+  else { id = uid(); data.metas.push({ id, nombre, objetivo }); }
+  save();
+  $('#metaOverlay').classList.remove('open');
+  render();
+  if (metaCb) metaCb(id);
+});
+$('#metaDelete').addEventListener('click', () => {
+  const m = data.metas.find(x => x.id === editingMetaId);
+  if (!m || !confirm(`¿Borrar la meta "${m.nombre}"? Lo que ya guardaste se queda como ahorro.`)) return;
+  data.metas = data.metas.filter(x => x.id !== m.id);
+  save();
+  $('#metaOverlay').classList.remove('open');
+  render();
+});
+
+/* ---------- Por pagar pronto (vencimientos) ---------- */
+function dueDate(ym, dia) {
+  const last = new Date(+ym.slice(0, 4), +ym.slice(5, 7), 0).getDate();
+  return ym + '-' + String(Math.min(dia, last)).padStart(2, '0');
+}
+const daysBetween = (a, b) => Math.round((Date.parse(b + 'T12:00:00') - Date.parse(a + 'T12:00:00')) / 86400000);
+// Monthly bills with a due day that are 3 days away or up to a week late, and not paid around that date
+function upcomingDue() {
+  const t = today(), ym = t.slice(0, 7), out = [];
+  data.fixed.filter(f => f.dia && fixFreqOf(f) === 'mensual' && (f.tipo || 'gasto') !== 'ingreso').forEach(f => {
+    [shiftMonth(ym, -1), ym, shiftMonth(ym, 1)].forEach(mo => {
+      const due = dueDate(mo, f.dia), left = daysBetween(t, due);
+      if (left < -7 || left > 3) return;
+      const paid = data.movs.some(m => m.fixedId === f.id && Math.abs(daysBetween(m.fecha, due)) <= 20);
+      if (!paid) out.push({ f, due, left });
+    });
+  });
+  return out.sort((a, b) => a.left - b.left);
+}
+function renderDue() {
+  const list = upcomingDue();
+  if (!list.length) { $('#dueBox').innerHTML = ''; return; }
+  const when = x => x.left < 0 ? `<span class="late">⚠️ Venció hace ${-x.left} ${x.left === -1 ? 'día' : 'días'}</span>`
+    : x.left === 0 ? '<span class="late">Vence hoy</span>' : x.left === 1 ? 'Vence mañana' : `Vence en ${x.left} días`;
+  $('#dueBox').innerHTML = `<div class="card due">
+    <h3 class="big">⏰ Por pagar pronto</h3>
+    ${list.map(x => `<div class="acct">
+      <div class="n" style="cursor:default">${catById(x.f.cat).emoji} ${esc(x.f.nombre)}<small>${when(x)}</small></div>
+      <span class="m">${fmt(x.f.monto)}</span>
+      <button class="btn primary small" data-duepay="${x.f.id}">Ya lo pagué</button>
+    </div>`).join('')}
+  </div>`;
+}
+$('#dueBox').addEventListener('click', e => {
+  const b = e.target.closest('[data-duepay]');
+  if (!b) return;
+  const t = data.fixed.find(x => x.id === b.dataset.duepay);
+  if (!t) return;
+  const mov = quickApply(t, today());
+  toast(`✓ ${t.nombre}: ${fmt(mov.monto)}`, [
+    ['Deshacer', () => deleteMov(mov.id)],
+    ['Otro valor', () => openMov(data.movs.find(m => m.id === mov.id))]
+  ]);
+});
+
 /* ---------- Aviso corto con "Deshacer" ---------- */
 let toastTimer = null;
 function toast(text, actions) {
@@ -1404,6 +1655,11 @@ function toast(text, actions) {
 }
 
 $('#fixedList').addEventListener('click', e => {
+  if (e.target.closest('[data-freqok]')) {
+    data.fixed.forEach(t => { if (!t.freq) t.freq = 'mensual'; });
+    data.settings.freqChecked = true;
+    save(); render(); return;
+  }
   const b = e.target.closest('[data-chk]');
   if (!b) return;
   const t = data.fixed.find(x => x.id === b.dataset.chk);
@@ -1426,6 +1682,7 @@ $('#fixedList').addEventListener('click', e => {
 let editingFixedId = null, fixTipo = 'gasto', fixCat = 'vivienda', fixDebtSel = '', fixFreq = 'mensual', fixSub = '';
 function setFixFreq(f) {
   fixFreq = f;
+  $('#fDiaField').style.display = f === 'mensual' ? 'block' : 'none'; // a due day only makes sense once a month
   document.querySelectorAll('#fFreq [data-freq]').forEach(b => b.classList.toggle('on', b.dataset.freq === f));
 }
 $('#fFreq').addEventListener('click', e => {
@@ -1472,6 +1729,7 @@ function setFixTipo(t) {
   $('#ftGasto').classList.toggle('on', t === 'gasto');
   $('#ftIngreso').classList.toggle('on', t === 'ingreso');
   $('#ftAhorro').classList.toggle('on', t === 'ahorro');
+  $('#fDiaLbl').textContent = t === 'ingreso' ? '¿Qué día te pagan? (opcional)' : t === 'ahorro' ? '¿Qué día lo guardas? (opcional)' : '¿Qué día del mes vence? (opcional)';
   renderFixChips();
 }
 $('#ftGasto').addEventListener('click', () => setFixTipo('gasto'));
@@ -1487,9 +1745,10 @@ function openFixed(t) {
   $('#fixTitle').textContent = t ? 'Cambiar esta cuenta' : 'Agregar una cuenta';
   $('#fixDelete').style.display = t ? 'block' : 'none';
   setFixFreq(t ? fixFreqOf(t) : 'mensual');
+  $('#fDia').value = t && t.dia ? String(t.dia) : '';
   $('#fName').value = t ? t.nombre : '';
-  $('#fAmt').value = t ? String(t.monto) : '';
-  $('#fAmtPrev').textContent = t ? '= ' + fmt(t.monto) + ' pesos' : '';
+  $('#fAmt').value = t ? fmt(t.monto) : '';
+  $('#fAmtPrev').textContent = t ? moneyWords(t.monto) : '';
   fixCat = t ? t.cat : 'vivienda';
   fixSub = t && t.sub ? t.sub : '';
   fixDebtSel = t && t.debtId ? t.debtId : '';
@@ -1503,13 +1762,14 @@ $('#fixSave').addEventListener('click', () => {
   const monto = numVal('#fAmt');
   if (!nombre || !monto) { $('#fAmtPrev').textContent = '⚠️ Falta el nombre o el monto'; return; }
   const debtId = (fixTipo === 'gasto' && fixCat === 'deudapago' && fixDebtSel) ? fixDebtSel : null;
+  const dia = fixFreq === 'mensual' && $('#fDia').value ? +$('#fDia').value : null;
   if (editingFixedId) {
     const i = data.fixed.findIndex(t => t.id === editingFixedId);
     // An older template may carry its own payroll flag; keep it while it points at the same debt
     const nomina = i > -1 && !!data.fixed[i].nomina && data.fixed[i].debtId === debtId;
-    if (i > -1) data.fixed[i] = { ...data.fixed[i], nombre, monto, tipo: fixTipo, cat: fixCat, sub: fixTipo === 'gasto' ? fixSub : '', debtId, nomina, freq: fixFreq };
+    if (i > -1) data.fixed[i] = { ...data.fixed[i], nombre, monto, tipo: fixTipo, cat: fixCat, sub: fixTipo === 'gasto' ? fixSub : '', debtId, nomina, freq: fixFreq, dia };
   } else {
-    data.fixed.push({ id: uid(), nombre, monto, tipo: fixTipo, cat: fixCat, sub: fixTipo === 'gasto' ? fixSub : '', debtId, freq: fixFreq });
+    data.fixed.push({ id: uid(), nombre, monto, tipo: fixTipo, cat: fixCat, sub: fixTipo === 'gasto' ? fixSub : '', debtId, freq: fixFreq, dia });
   }
   save();
   editingFixedId = null;
@@ -1626,9 +1886,47 @@ function bindMoneyPreview(inputSel, prevSel) {
     $(prevSel).textContent = n ? '= ' + fmt(n) + ' pesos' : '';
   });
 }
-bindMoneyPreview('#dBal', '#dBalPrev');
-bindMoneyPreview('#dPay', '#dPayPrev');
 const numVal = sel => parseInt($(sel).value.replace(/[^\d]/g, ''), 10) || 0;
+
+/* ---------- Teclado grande para cualquier valor ---------- */
+let kpVal = 0, kpCb = null;
+function askAmount(title, initial, cb) {
+  kpVal = initial || 0; kpCb = cb;
+  $('#kpTitle').textContent = title;
+  kpRender();
+  $('#amtOverlay').classList.add('open');
+}
+function kpRender() {
+  $('#kpShow').textContent = fmt(kpVal);
+  $('#kpWords').textContent = moneyWords(kpVal) || 'Toca los números para escribir el valor';
+}
+function kpPress(k) {
+  const cur = kpVal ? String(kpVal) : '';
+  const n = k === 'back' ? cur.slice(0, -1) : cur + k;
+  if (n.replace(/^0+/, '').length > 9) return;
+  kpVal = parseInt(n, 10) || 0;
+  kpRender();
+}
+$('#kpKeys').addEventListener('click', e => { const b = e.target.closest('[data-kk]'); if (b) kpPress(b.dataset.kk); });
+$('#kpCancel').addEventListener('click', () => $('#amtOverlay').classList.remove('open'));
+$('#kpOk').addEventListener('click', () => {
+  $('#amtOverlay').classList.remove('open');
+  if (kpCb) kpCb(kpVal);
+});
+document.addEventListener('keydown', e => {
+  if (!$('#amtOverlay').classList.contains('open')) return;
+  if (/^\d$/.test(e.key)) kpPress(e.key);
+  else if (e.key === 'Backspace') kpPress('back');
+  else if (e.key === 'Enter') $('#kpOk').click();
+  else if (e.key === 'Escape') $('#kpCancel').click();
+});
+// Amount fields in forms open the big keypad instead of the phone keyboard
+document.querySelectorAll('input.amtin').forEach(inp => inp.addEventListener('click', () =>
+  askAmount(inp.dataset.q, numVal('#' + inp.id), n => {
+    inp.value = n ? fmt(n) : '';
+    const prev = $('#' + inp.id + 'Prev');
+    if (prev) prev.textContent = moneyWords(n);
+  })));
 
 /* ---------- Movimiento: registro en pasos ---------- */
 let movTipo = 'gasto', movCat = null, movDebtSel = '', pendingFixedId = null, movAmount = 0;
@@ -1697,7 +1995,7 @@ function renderStep2() {
   $('#m2Msg').textContent = '';
   renderChips();
 }
-let movSub = '', showAllTiles = false;
+let movSub = '', showAllTiles = false, movMetaSel = '';
 function renderChips() {
   const cats = pickCats(movTipo, movCat);
   if (movCat && !cats.some(c => c.id === movCat)) movCat = null;
@@ -1722,7 +2020,22 @@ function renderChips() {
   }
   $('#subNewRow').style.display = 'none';
   updateDebtField();
+  updateMetaField();
 }
+function updateMetaField() {
+  const show = movTipo === 'ahorro' && movCat === 'meta';
+  $('#movMetaField').style.display = show ? 'block' : 'none';
+  if (show) {
+    $('#movMeta').innerHTML = data.metas.map(m =>
+      `<button class="tile ${movMetaSel === m.id ? 'on' : ''}" data-meta="${m.id}">🎯 ${esc(m.nombre)}<small>Llevas ${fmt(metaSaved(m.id))} de ${fmt(m.objetivo)}</small></button>`
+    ).join('') + `<button class="tile" data-metanew>＋ Crear una meta nueva</button>`;
+  }
+}
+$('#movMeta').addEventListener('click', e => {
+  if (e.target.closest('[data-metanew]')) { openMeta(null, id => { movMetaSel = id; updateMetaField(); }); return; }
+  const b = e.target.closest('[data-meta]');
+  if (b) { movMetaSel = movMetaSel === b.dataset.meta ? '' : b.dataset.meta; updateMetaField(); }
+});
 $('#movSubs').addEventListener('click', e => {
   const n = e.target.closest('[data-subnew]');
   if (n) { $('#subNewRow').style.display = 'flex'; $('#subNewTxt').value = ''; $('#subNewTxt').focus(); return; }
@@ -1829,6 +2142,7 @@ function openMov(mov, preset, tipo) {
   movCat = src.cat || (movTipo === 'ingreso' ? 'salario' : movTipo === 'ahorro' ? 'ahorrogen' : null);
   movDebtSel = src.debtId || '';
   movSub = src.sub || '';
+  movMetaSel = src.metaId || '';
   showAllTiles = false;
   movAmount = src.monto || 0;
   $('#movDesc').value = src.desc || '';
@@ -1863,7 +2177,8 @@ $('#movSave').addEventListener('click', () => {
   const nomina = !!(debt && (debt.nomina || (old && old.nomina && old.debtId === linkDebt) ||
     (tpl && tpl.nomina && tpl.debtId === linkDebt)));
   const sub = movTipo === 'gasto' && movSub ? movSub : ''; // cleared whenever the category changes
-  const payload = { tipo: movTipo, cat: movCat, sub, monto, desc: $('#movDesc').value.trim(), fecha, debtId: linkDebt, nomina, fixedId: pendingFixedId };
+  const metaId = movTipo === 'ahorro' && movCat === 'meta' && data.metas.some(m => m.id === movMetaSel) ? movMetaSel : '';
+  const payload = { tipo: movTipo, cat: movCat, sub, metaId, monto, desc: $('#movDesc').value.trim(), fecha, debtId: linkDebt, nomina, fixedId: pendingFixedId };
   if (editingMovId) {
     const i = data.movs.findIndex(m => m.id === editingMovId);
     if (i > -1) {
@@ -1891,12 +2206,12 @@ function openDebt(debt) {
   $('#debtTitle').textContent = debt ? 'Cambiar datos de la deuda' : 'Agregar una deuda';
   $('#debtDelete').style.display = debt ? 'block' : 'none';
   $('#dName').value = debt ? debt.nombre : '';
-  $('#dBal').value = debt ? String(debt.saldo) : '';
-  $('#dPay').value = debt && debt.cuota ? String(debt.cuota) : '';
+  $('#dBal').value = debt ? fmt(debt.saldo) : '';
+  $('#dPay').value = debt && debt.cuota ? fmt(debt.cuota) : '';
   $('#dRate').value = debt && debt.tasa != null ? String(debt.tasa) : '';
   $('#dNomina').checked = !!(debt && debt.nomina);
-  $('#dBalPrev').textContent = debt ? '= ' + fmt(debt.saldo) + ' pesos' : '';
-  $('#dPayPrev').textContent = debt && debt.cuota ? '= ' + fmt(debt.cuota) + ' pesos' : '';
+  $('#dBalPrev').textContent = debt ? moneyWords(debt.saldo) : '';
+  $('#dPayPrev').textContent = debt && debt.cuota ? moneyWords(debt.cuota) : '';
   $('#debtOverlay').classList.add('open');
 }
 $('#addDebtBtn').addEventListener('click', () => openDebt(null));
@@ -1961,12 +2276,11 @@ document.body.addEventListener('click', e => {
 });
 
 /* Close modals tapping outside */
-['movOverlay', 'debtOverlay', 'fixOverlay', 'setOverlay'].forEach(id => {
+['movOverlay', 'debtOverlay', 'fixOverlay', 'setOverlay', 'metaOverlay', 'amtOverlay'].forEach(id => {
   $('#' + id).addEventListener('click', e => {
     if (e.target.id === id) $('#' + id).classList.remove('open');
   });
 });
-bindMoneyPreview('#fAmt', '#fAmtPrev');
 
 /* ---------- Ajustes ---------- */
 $('#settingsBtn').addEventListener('click', () => { renderSettings(); $('#setOverlay').classList.add('open'); });
@@ -2104,6 +2418,7 @@ $('#restoreFile').addEventListener('change', async e => {
   const when = f.name.match(/\d{4}-\d{2}-\d{2}/);
   if (!confirm(`¿Recuperar esta copia${when ? ' del ' + when[0] : ''}? Tiene ${d.movs.length} movimientos y ${d.debts.length} deudas.\n\nLo que tienes ahora en la app se reemplazará por lo de la copia.`)) return;
   data = { movs: d.movs, debts: d.debts, prios: d.prios || [], fixed: d.fixed || [], subs: d.subs || {},
+    metas: d.metas || [], topes: d.topes || {},
     settings: d.settings || { name: '', pay: 'quincenal', onboarded: true } };
   $('#onb').classList.remove('open');
   save();
@@ -2133,12 +2448,19 @@ function enterDemo() {
   const ym = today().slice(0, 7);
   const d = day => `${ym}-${String(day).padStart(2, '0')}`;
   const tcId = uid();
-  const fixArriendo = uid(), fixServicios = uid(), fixCuota = uid(), fixSueldo = uid();
+  const fixArriendo = uid(), fixServicios = uid(), fixCuota = uid(), fixSueldo = uid(), fixCel = uid(), metaViaje = uid();
+  const pm = shiftMonth(ym, -1), pd = day => `${pm}-${String(day).padStart(2, '0')}`;
+  const celDia = Math.min(28, +today().slice(8, 10) + 2); // so "Por pagar pronto" has something to show
   data = {
     movs: [
       { id:uid(), tipo:'ingreso', cat:'salario',  monto:2400000, desc:'Mi sueldo',           fecha:d(1), fixedId:fixSueldo },
       { id:uid(), tipo:'ingreso', cat:'freelance',monto:350000,  desc:'Trabajo extra',       fecha:d(12) },
-      { id:uid(), tipo:'ahorro',  cat:'ahorrogen',monto:200000,  desc:'Guardado del mes',    fecha:d(2) },
+      { id:uid(), tipo:'ahorro',  cat:'meta',     monto:200000,  desc:'',                    fecha:d(2), metaId:metaViaje },
+      { id:uid(), tipo:'ahorro',  cat:'meta',     monto:250000,  desc:'',                    fecha:pd(3), metaId:metaViaje },
+      { id:uid(), tipo:'ingreso', cat:'salario',  monto:2400000, desc:'Mi sueldo',           fecha:pd(1) },
+      { id:uid(), tipo:'gasto',   cat:'comida',   monto:820000,  desc:'',                    fecha:pd(4), sub:'Mercado' },
+      { id:uid(), tipo:'gasto',   cat:'hormiga',  monto:150000,  desc:'',                    fecha:pd(6), sub:'Domicilios' },
+      { id:uid(), tipo:'gasto',   cat:'transporte',monto:140000, desc:'',                    fecha:pd(4), sub:'Bus / Metro' },
       { id:uid(), tipo:'gasto', cat:'vivienda',  monto:850000, desc:'Arriendo',              fecha:d(2), sub:'Arriendo', fixedId:fixArriendo },
       { id:uid(), tipo:'gasto', cat:'vivienda',  monto:70000,  desc:'',                      fecha:d(5), sub:'Luz' },
       { id:uid(), tipo:'gasto', cat:'vivienda',  monto:45000,  desc:'',                      fecha:d(5), sub:'Agua' },
@@ -2163,12 +2485,15 @@ function enterDemo() {
     ],
     fixed: [
       { id:fixSueldo,    nombre:'Mi sueldo',             monto:2400000, tipo:'ingreso', cat:'salario',  freq:'mensual' },
-      { id:fixArriendo,  nombre:'Arriendo',              monto:850000, tipo:'gasto', cat:'vivienda', sub:'Arriendo', freq:'mensual' },
+      { id:fixArriendo,  nombre:'Arriendo',              monto:850000, tipo:'gasto', cat:'vivienda', sub:'Arriendo', freq:'mensual', dia:2 },
+      { id:fixCel,       nombre:'Plan del celular',      monto:55000,  tipo:'gasto', cat:'vivienda', sub:'Celular', freq:'mensual', dia:celDia },
       { id:fixServicios, nombre:'Internet',              monto:65000,  tipo:'gasto', cat:'vivienda', sub:'Internet', freq:'mensual' },
       { id:fixCuota,     nombre:'Cuota tarjeta',         monto:220000, tipo:'gasto', cat:'deudapago', debtId:tcId, freq:'mensual' },
       { id:uid(),        nombre:'Ahorro',                monto:100000, tipo:'ahorro', cat:'ahorrogen',  freq:'quincenal' }
     ],
     prios: ['deudas', 'ahorro'],
+    metas: [{ id: metaViaje, nombre: 'Viaje a la costa', objetivo: 1500000 }],
+    topes: { hormiga: 80000 },
     settings: { name: '', pay: 'mensual', onboarded: true }
   };
   save();
@@ -2213,7 +2538,6 @@ $('#oDebt').addEventListener('click', e => {
   document.querySelectorAll('#oDebt .tile').forEach(x => x.classList.toggle('on', x === b));
   $('#o4Msg').textContent = '';
 });
-bindMoneyPreview('#oIncome', '#oIncomePrev');
 $('#oDemo').addEventListener('click', () => { $('#onb').classList.remove('open'); enterDemo(); });
 $('#oRestore').addEventListener('click', () => { $('#restoreFile').value = ''; $('#restoreFile').click(); });
 $('#oFinish').addEventListener('click', () => {
@@ -2237,7 +2561,7 @@ $('#wipeBtn').addEventListener('click', () => {
   const r = prompt('Esto borra TODA tu información y no se puede deshacer.\n\nSi solo quieres corregir algo, mejor toca ese registro y cámbialo.\n\nPara borrar todo, escribe la palabra BORRAR:');
   if (r === null) return;
   if (r.trim().toUpperCase() !== 'BORRAR') { alert('No escribiste BORRAR, así que no se borró nada.'); return; }
-  data = { movs: [], debts: [], prios: [], fixed: [], settings: { name: '', pay: 'mensual', onboarded: false } };
+  data = { movs: [], debts: [], prios: [], fixed: [], metas: [], topes: {}, settings: { name: '', pay: 'mensual', onboarded: false } };
   store.clear(); save();
   $('#setOverlay').classList.remove('open');
   render();
