@@ -357,6 +357,21 @@
   .dots{display:flex;gap:8px;justify-content:center;margin:0 0 22px}
   .dots i{width:10px;height:10px;border-radius:5px;background:var(--line)}
   .dots i.on{background:var(--green);width:28px}
+  /* Subcategorías */
+  .picked{display:flex;align-items:center;gap:12px;border:3px solid var(--green);background:var(--green-soft);border-radius:18px;padding:12px 14px}
+  .picked .pe{font-size:30px}
+  .picked b{flex:1;font-size:18px}
+  .subs{display:flex;flex-wrap:wrap;gap:8px}
+  .subs .chip{font-size:16px;padding:11px 15px}
+  .subnew{display:flex;gap:8px;margin-top:10px}
+  .subnew input{flex:1;border:1.5px solid var(--line);border-radius:12px;padding:12px;font-family:var(--font);font-size:16px}
+  .catrow{cursor:pointer}
+  .catrow .go{color:var(--muted);font-size:18px;transition:transform .15s}
+  .catrow.open .go{transform:rotate(90deg)}
+  .subrows{margin:-2px 0 8px 56px;padding:4px 0 6px;border-bottom:1px solid var(--line)}
+  .subrows div{display:flex;justify-content:space-between;font-size:15px;padding:5px 0;color:var(--ink)}
+  .subrows div span:first-child{color:var(--muted)}
+  .subrows p{font-size:14px;color:var(--muted);padding:4px 0}
   .col-side{display:none}
   @media(min-width:900px){.col-side{display:block}}
 
@@ -432,6 +447,7 @@
 
       <div class="card">
         <h3 class="big">En qué se fue más plata</h3>
+        <p class="sub" style="margin:2px 0 0">Toca una para ver el detalle.</p>
         <div id="riverWrap" style="margin-top:6px"></div>
       </div>
     </section>
@@ -525,6 +541,14 @@
       <div class="q" id="m2Q"></div>
       <p id="m2Msg" style="color:var(--red);font-weight:700;font-size:15px;margin:-6px 0 8px"></p>
       <div class="tiles" id="movChips"></div>
+      <div id="movSubBox" style="display:none">
+        <span class="lbl2">¿Qué fue exactamente? <span style="font-weight:500;color:var(--muted)">(opcional)</span></span>
+        <div class="subs" id="movSubs"></div>
+        <div class="subnew" id="subNewRow" style="display:none">
+          <input type="text" id="subNewTxt" placeholder="Ej: Gas, Netflix, Peluquería…" maxlength="30">
+          <button class="btn primary small" id="subNewAdd">Agregar</button>
+        </div>
+      </div>
       <div id="movDebtField" style="display:none">
         <span class="lbl2">¿Cuál deuda pagaste? Su saldo bajará solo.</span>
         <div class="tiles list" id="movDebt"></div>
@@ -603,6 +627,10 @@
     <div class="field">
       <label>¿De qué tipo es?</label>
       <div class="chips" id="fixChips"></div>
+    </div>
+    <div class="field" id="fixSubField" style="display:none">
+      <label>¿Qué es exactamente? (opcional)</label>
+      <div class="chips" id="fixSubs"></div>
     </div>
     <div class="field" id="fixDebtField" style="display:none">
       <label>¿De cuál deuda es esta cuota? Cada vez que la marques, la deuda bajará sola.</label>
@@ -716,7 +744,7 @@
     <div class="actions">
       <button class="btn soft" id="setClose">Cerrar</button>
     </div>
-    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:12px">Mi Plata · versión 4.2</p>
+    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:12px">Mi Plata · versión 4.3</p>
   </div>
 </div>
 
@@ -808,6 +836,23 @@ const PICK = {
     ['meta', 'Para una meta', 'un viaje, una compra…']
   ]
 };
+// Subcategories ("¿qué fue exactamente?"). People can add their own per category (data.subs).
+const SUBS = {
+  comida:     ['Mercado', 'Restaurante', 'Almuerzo', 'Domicilios', 'Panadería / tienda'],
+  vivienda:   ['Arriendo', 'Agua', 'Luz', 'Gas', 'Internet', 'Celular', 'Administración', 'Arreglos'],
+  transporte: ['Bus / Metro', 'Taxi / app', 'Gasolina', 'Parqueadero', 'Arreglos del carro o moto'],
+  hormiga:    ['Café', 'Mecato', 'Domicilios', 'Dulces', 'Cigarrillos'],
+  salud:      ['Medicinas', 'Citas médicas', 'Odontología', 'Exámenes', 'Óptica'],
+  entret:     ['Salidas', 'Cine', 'Paseos', 'Suscripciones', 'Deporte'],
+  otros:      ['Ropa', 'Estudio', 'Regalos', 'Mascotas', 'Cuidado personal', 'Hogar']
+};
+function subsFor(cat) {
+  const own = (data.subs && data.subs[cat]) || [];
+  return [...(SUBS[cat] || []), ...own.filter(x => !(SUBS[cat] || []).includes(x))];
+}
+// Older "Servicios" records live inside "Casa y servicios"
+const subOf = m => m.sub || (m.cat === 'servicios' ? 'Servicios' : '');
+
 // Picker list for a type; keeps an older category visible when editing a record that uses it
 function pickCats(tipo, current) {
   const list = PICK[tipo].map(([id, name, sub]) => ({ ...catById(id), name, sub }));
@@ -1006,7 +1051,7 @@ function renderHero(M) {
 }
 
 /* ---------- Río de plata ---------- */
-let showAllCats = false;
+let showAllCats = false, openCat = null;
 function renderRiver(M) {
   const wrap = $('#riverWrap');
   if (M.totOut === 0) {
@@ -1014,17 +1059,31 @@ function renderRiver(M) {
     return;
   }
   const max = M.cats[0].amt;
-  const rows = (showAllCats ? M.cats : M.cats.slice(0, 3)).map(c => `<div class="catrow">
+  const rows = (showAllCats ? M.cats : M.cats.slice(0, 3)).map(c => {
+    const open = openCat === c.id;
+    let detail = '';
+    if (open) {
+      const by = {};
+      M.gastos.filter(m => (m.cat === 'servicios' ? 'vivienda' : m.cat) === c.id)
+        .forEach(m => { const k = subOf(m) || 'Sin detalle'; by[k] = (by[k] || 0) + m.monto; });
+      const list = Object.entries(by).sort((a, b) => (a[0] === 'Sin detalle') - (b[0] === 'Sin detalle') || b[1] - a[1]);
+      detail = `<div class="subrows">${list.map(([k, v]) => `<div><span>${esc(k)}</span><b>${fmt(v)}</b></div>`).join('')}
+        ${list.length === 1 && list[0][0] === 'Sin detalle' ? `<p>💡 La próxima vez que anotes un gasto aquí, elige qué fue exactamente y verás el desglose.</p>` : ''}</div>`;
+    }
+    return `<div class="catrow ${open ? 'open' : ''}" data-opencat="${c.id}">
       <span class="ic">${c.emoji}</span>
       <div class="n">${esc(c.name)}<div class="mini"><i style="width:${(c.amt / max) * 100}%;background:${c.color}"></i></div></div>
-      <span class="m">${fmt(c.amt)}</span>
-    </div>`).join('');
+      <span class="m">${fmt(c.amt)}</span><span class="go">›</span>
+    </div>${detail}`;
+  }).join('');
   const more = M.cats.length > 3
     ? `<button class="linkbtn" data-allcats>${showAllCats ? 'Ver menos' : `Ver todo (${M.cats.length - 3} más)`}</button>` : '';
   wrap.innerHTML = rows + more;
 }
 $('#riverWrap').addEventListener('click', e => {
-  if (e.target.closest('[data-allcats]')) { showAllCats = !showAllCats; renderRiver(monthData()); }
+  if (e.target.closest('[data-allcats]')) { showAllCats = !showAllCats; renderRiver(monthData()); return; }
+  const r = e.target.closest('[data-opencat]');
+  if (r) { openCat = openCat === r.dataset.opencat ? null : r.dataset.opencat; renderRiver(monthData()); }
 });
 
 /* ---------- Insights en lenguaje sencillo ---------- */
@@ -1204,7 +1263,7 @@ function renderMovs(M) {
     const cls = m.tipo === 'ingreso' ? 'in' : (m.tipo === 'ahorro' ? 'sv' : (m.nomina ? 'nom' : 'out'));
     return `<button class="mrow" data-editmov="${m.id}">
       <span class="ic">${c.emoji}</span>
-      <span class="n">${esc(m.desc || c.name)}<small>${dayLabel(m.fecha)} · ${esc(c.name)}${m.nomina ? ' · 🏢 por nómina' : ''}</small></span>
+      <span class="n">${esc(m.desc || m.sub || c.name)}<small>${dayLabel(m.fecha)} · ${esc(c.name)}${m.sub && m.desc ? ' · ' + esc(m.sub) : ''}${m.nomina ? ' · 🏢 por nómina' : ''}</small></span>
       <span class="m ${cls}">${sign}${fmt(m.monto)}</span>
       <span class="go">›</span>
     </button>`;
@@ -1307,7 +1366,7 @@ function dateFor(ym, q) {
 }
 function quickApply(t, fecha) {
   const tipo = t.tipo || 'gasto';
-  const mov = { id: uid(), tipo, cat: t.cat, monto: t.monto, desc: t.nombre, fecha, fixedId: t.id };
+  const mov = { id: uid(), tipo, cat: t.cat, sub: t.sub || '', monto: t.monto, desc: t.nombre, fecha, fixedId: t.id };
   if (tipo === 'gasto' && t.cat === 'deudapago' && t.debtId && data.debts.some(d => d.id === t.debtId)) {
     const dbt = data.debts.find(d => d.id === t.debtId);
     mov.debtId = t.debtId;
@@ -1362,7 +1421,7 @@ $('#fixedList').addEventListener('click', e => {
   ]);
 });
 
-let editingFixedId = null, fixTipo = 'gasto', fixCat = 'vivienda', fixDebtSel = '', fixFreq = 'mensual';
+let editingFixedId = null, fixTipo = 'gasto', fixCat = 'vivienda', fixDebtSel = '', fixFreq = 'mensual', fixSub = '';
 function setFixFreq(f) {
   fixFreq = f;
   document.querySelectorAll('#fFreq [data-freq]').forEach(b => b.classList.toggle('on', b.dataset.freq === f));
@@ -1377,8 +1436,22 @@ function renderFixChips() {
   $('#fixChips').innerHTML = cats.map(c =>
     `<button class="chip ${c.id === fixCat ? 'on' : ''}" data-fixcat="${c.id}">${c.emoji} ${c.name}</button>`
   ).join('');
+  const subs = fixTipo === 'gasto' ? subsFor(fixCat) : [];
+  $('#fixSubField').style.display = subs.length ? 'block' : 'none';
+  $('#fixSubs').innerHTML = subs.map(x =>
+    `<button class="chip ${x === fixSub ? 'on' : ''}" data-fixsub="${esc(x)}">${esc(x)}</button>`).join('') +
+    `<button class="chip" data-fixsubnew>＋ Otra</button>`;
   updateFixDebtField();
 }
+$('#fixSubs').addEventListener('click', e => {
+  if (e.target.closest('[data-fixsubnew]')) {
+    const name = addOwnSub(fixCat, prompt('¿Cómo se llama? (por ejemplo: Gas, Netflix, Peluquería)') || '');
+    if (name) { fixSub = name; renderFixChips(); }
+    return;
+  }
+  const b = e.target.closest('[data-fixsub]');
+  if (b) { fixSub = fixSub === b.dataset.fixsub ? '' : b.dataset.fixsub; renderFixChips(); }
+});
 function updateFixDebtField() {
   const localDebts = data.debts;
   const show = fixTipo === 'gasto' && fixCat === 'deudapago' && localDebts.length > 0;
@@ -1404,7 +1477,7 @@ $('#ftAhorro').addEventListener('click', () => setFixTipo('ahorro'));
 $('#fixDebt').addEventListener('change', e => { fixDebtSel = e.target.value; });
 $('#fixChips').addEventListener('click', e => {
   const b = e.target.closest('[data-fixcat]');
-  if (b) { fixCat = b.dataset.fixcat; renderFixChips(); }
+  if (b) { if (b.dataset.fixcat !== fixCat) fixSub = ''; fixCat = b.dataset.fixcat; renderFixChips(); }
 });
 function openFixed(t) {
   editingFixedId = t ? t.id : null;
@@ -1415,6 +1488,7 @@ function openFixed(t) {
   $('#fAmt').value = t ? String(t.monto) : '';
   $('#fAmtPrev').textContent = t ? '= ' + fmt(t.monto) + ' pesos' : '';
   fixCat = t ? t.cat : 'vivienda';
+  fixSub = t && t.sub ? t.sub : '';
   fixDebtSel = t && t.debtId ? t.debtId : '';
   setFixTipo(t && t.tipo ? t.tipo : 'gasto');
   $('#fixOverlay').classList.add('open');
@@ -1430,9 +1504,9 @@ $('#fixSave').addEventListener('click', () => {
     const i = data.fixed.findIndex(t => t.id === editingFixedId);
     // An older template may carry its own payroll flag; keep it while it points at the same debt
     const nomina = i > -1 && !!data.fixed[i].nomina && data.fixed[i].debtId === debtId;
-    if (i > -1) data.fixed[i] = { ...data.fixed[i], nombre, monto, tipo: fixTipo, cat: fixCat, debtId, nomina, freq: fixFreq };
+    if (i > -1) data.fixed[i] = { ...data.fixed[i], nombre, monto, tipo: fixTipo, cat: fixCat, sub: fixTipo === 'gasto' ? fixSub : '', debtId, nomina, freq: fixFreq };
   } else {
-    data.fixed.push({ id: uid(), nombre, monto, tipo: fixTipo, cat: fixCat, debtId, freq: fixFreq });
+    data.fixed.push({ id: uid(), nombre, monto, tipo: fixTipo, cat: fixCat, sub: fixTipo === 'gasto' ? fixSub : '', debtId, freq: fixFreq });
   }
   save();
   editingFixedId = null;
@@ -1620,14 +1694,55 @@ function renderStep2() {
   $('#m2Msg').textContent = '';
   renderChips();
 }
+let movSub = '', showAllTiles = false;
 function renderChips() {
   const cats = pickCats(movTipo, movCat);
   if (movCat && !cats.some(c => c.id === movCat)) movCat = null;
-  $('#movChips').innerHTML = cats.map(c =>
-    `<button class="tile ${c.id === movCat ? 'on' : ''}" data-cat="${c.id}"><b>${c.emoji}</b>${esc(c.name)}${c.sub ? `<small>${esc(c.sub)}</small>` : ''}</button>`
-  ).join('');
+  const subs = movTipo === 'gasto' && movCat ? subsFor(movCat) : [];
+  const box = $('#movChips');
+  if (subs.length && !showAllTiles) {
+    // Category chosen: fold the tiles and ask for the detail
+    const c = cats.find(x => x.id === movCat);
+    box.className = 'tiles list';
+    box.innerHTML = `<div class="picked"><span class="pe">${c.emoji}</span><b>${esc(c.name)}</b><button class="linkbtn" data-recat>Cambiar</button></div>`;
+    $('#movSubs').innerHTML = subs.map(x =>
+      `<button class="chip ${x === movSub ? 'on' : ''}" data-sub="${esc(x)}">${esc(x)}</button>`
+    ).join('') + `<button class="chip" data-subnew>＋ Otra</button>`;
+    $('#movSubBox').style.display = 'block';
+  } else {
+    box.className = 'tiles';
+    box.innerHTML = cats.map(c =>
+      `<button class="tile ${c.id === movCat ? 'on' : ''}" data-cat="${c.id}"><b>${c.emoji}</b>${esc(c.name)}${c.sub ? `<small>${esc(c.sub)}</small>` : ''}</button>`
+    ).join('');
+    $('#movSubBox').style.display = 'none';
+  }
+  $('#subNewRow').style.display = 'none';
   updateDebtField();
 }
+$('#movSubs').addEventListener('click', e => {
+  const n = e.target.closest('[data-subnew]');
+  if (n) { $('#subNewRow').style.display = 'flex'; $('#subNewTxt').value = ''; $('#subNewTxt').focus(); return; }
+  const b = e.target.closest('[data-sub]');
+  if (!b) return;
+  movSub = movSub === b.dataset.sub ? '' : b.dataset.sub; // tap again to unselect
+  renderChips();
+});
+function addOwnSub(cat, name) {
+  name = name.trim().replace(/\s+/g, ' ');
+  if (!name) return '';
+  const hit = subsFor(cat).find(x => x.toLowerCase() === name.toLowerCase());
+  if (hit) return hit;
+  name = name.charAt(0).toUpperCase() + name.slice(1);
+  if (!data.subs) data.subs = {};
+  data.subs[cat] = [...(data.subs[cat] || []), name];
+  save();
+  return name;
+}
+$('#subNewAdd').addEventListener('click', () => {
+  const name = addOwnSub(movCat, $('#subNewTxt').value);
+  if (name) { movSub = name; renderChips(); }
+});
+$('#subNewTxt').addEventListener('keydown', e => { if (e.key === 'Enter') $('#subNewAdd').click(); });
 function updateDebtField() {
   const show = movTipo === 'gasto' && movCat === 'deudapago' && data.debts.length > 0;
   $('#movDebtField').style.display = show ? 'block' : 'none';
@@ -1639,14 +1754,20 @@ function updateDebtField() {
 }
 $('#movChips').addEventListener('click', e => {
   const b = e.target.closest('[data-cat]');
-  if (b) { movCat = b.dataset.cat; $('#m2Msg').textContent = ''; renderChips(); }
+  if (b) {
+    if (b.dataset.cat !== movCat) movSub = '';
+    movCat = b.dataset.cat; showAllTiles = false;
+    $('#m2Msg').textContent = ''; renderChips();
+    return;
+  }
+  if (e.target.closest('[data-recat]')) { showAllTiles = true; renderChips(); }
 });
 $('#movDebt').addEventListener('click', e => {
   const b = e.target.closest('[data-debt]');
   if (b) { movDebtSel = b.dataset.debt; updateDebtField(); }
 });
 function setTipo(t) {
-  if (t !== movTipo) movCat = null;
+  if (t !== movTipo) { movCat = null; movSub = ''; }
   movTipo = t;
   renderStep1();
 }
@@ -1703,6 +1824,8 @@ function openMov(mov, preset, tipo) {
   movTipo = src.tipo || tipo || 'gasto';
   movCat = src.cat || (movTipo === 'ingreso' ? 'salario' : movTipo === 'ahorro' ? 'ahorrogen' : null);
   movDebtSel = src.debtId || '';
+  movSub = src.sub || '';
+  showAllTiles = false;
   movAmount = src.monto || 0;
   $('#movDesc').value = src.desc || '';
   $('#noteField').style.display = src.desc ? 'block' : 'none';
@@ -1735,7 +1858,8 @@ $('#movSave').addEventListener('click', () => {
   const tpl = pendingFixedId ? data.fixed.find(f => f.id === pendingFixedId) : null;
   const nomina = !!(debt && (debt.nomina || (old && old.nomina && old.debtId === linkDebt) ||
     (tpl && tpl.nomina && tpl.debtId === linkDebt)));
-  const payload = { tipo: movTipo, cat: movCat, monto, desc: $('#movDesc').value.trim(), fecha, debtId: linkDebt, nomina, fixedId: pendingFixedId };
+  const sub = movTipo === 'gasto' && movSub && subsFor(movCat).includes(movSub) ? movSub : '';
+  const payload = { tipo: movTipo, cat: movCat, sub, monto, desc: $('#movDesc').value.trim(), fecha, debtId: linkDebt, nomina, fixedId: pendingFixedId };
   if (editingMovId) {
     const i = data.movs.findIndex(m => m.id === editingMovId);
     if (i > -1) {
@@ -1952,7 +2076,7 @@ $('#restoreFile').addEventListener('change', async e => {
   }
   const when = f.name.match(/\d{4}-\d{2}-\d{2}/);
   if (!confirm(`¿Recuperar esta copia${when ? ' del ' + when[0] : ''}? Tiene ${d.movs.length} movimientos y ${d.debts.length} deudas.\n\nLo que tienes ahora en la app se reemplazará por lo de la copia.`)) return;
-  data = { movs: d.movs, debts: d.debts, prios: d.prios || [], fixed: d.fixed || [],
+  data = { movs: d.movs, debts: d.debts, prios: d.prios || [], fixed: d.fixed || [], subs: d.subs || {},
     settings: d.settings || { name: '', pay: 'quincenal', onboarded: true } };
   $('#onb').classList.remove('open');
   save();
@@ -1988,20 +2112,22 @@ function enterDemo() {
       { id:uid(), tipo:'ingreso', cat:'salario',  monto:2400000, desc:'Mi sueldo',           fecha:d(1), fixedId:fixSueldo },
       { id:uid(), tipo:'ingreso', cat:'freelance',monto:350000,  desc:'Trabajo extra',       fecha:d(12) },
       { id:uid(), tipo:'ahorro',  cat:'ahorrogen',monto:200000,  desc:'Guardado del mes',    fecha:d(2) },
-      { id:uid(), tipo:'gasto', cat:'vivienda',  monto:850000, desc:'Arriendo',              fecha:d(2), fixedId:fixArriendo },
-      { id:uid(), tipo:'gasto', cat:'servicios', monto:180000, desc:'Luz, agua e internet',  fecha:d(5), fixedId:fixServicios },
-      { id:uid(), tipo:'gasto', cat:'comida',    monto:320000, desc:'Mercado quincena 1',    fecha:d(3) },
-      { id:uid(), tipo:'gasto', cat:'comida',    monto:280000, desc:'Mercado quincena 2',    fecha:d(16) },
-      { id:uid(), tipo:'gasto', cat:'comida',    monto:45000,  desc:'Almuerzo por fuera',    fecha:d(8) },
-      { id:uid(), tipo:'gasto', cat:'transporte',monto:140000, desc:'Pasajes del mes',       fecha:d(4) },
+      { id:uid(), tipo:'gasto', cat:'vivienda',  monto:850000, desc:'Arriendo',              fecha:d(2), sub:'Arriendo', fixedId:fixArriendo },
+      { id:uid(), tipo:'gasto', cat:'vivienda',  monto:70000,  desc:'',                      fecha:d(5), sub:'Luz' },
+      { id:uid(), tipo:'gasto', cat:'vivienda',  monto:45000,  desc:'',                      fecha:d(5), sub:'Agua' },
+      { id:uid(), tipo:'gasto', cat:'vivienda',  monto:65000,  desc:'',                      fecha:d(5), sub:'Internet', fixedId:fixServicios },
+      { id:uid(), tipo:'gasto', cat:'comida',    monto:320000, desc:'Mercado quincena 1',    fecha:d(3), sub:'Mercado' },
+      { id:uid(), tipo:'gasto', cat:'comida',    monto:280000, desc:'Mercado quincena 2',    fecha:d(16), sub:'Mercado' },
+      { id:uid(), tipo:'gasto', cat:'comida',    monto:45000,  desc:'Almuerzo por fuera',    fecha:d(8), sub:'Almuerzo' },
+      { id:uid(), tipo:'gasto', cat:'transporte',monto:140000, desc:'Pasajes del mes',       fecha:d(4), sub:'Bus / Metro' },
       { id:uid(), tipo:'gasto', cat:'deudapago', monto:220000, desc:'Cuota tarjeta',         fecha:d(6), fixedId:fixCuota, debtId:tcId },
-      { id:uid(), tipo:'gasto', cat:'entret',    monto:95000,  desc:'Cine y salida',         fecha:d(14) },
-      { id:uid(), tipo:'gasto', cat:'hormiga',   monto:12000,  desc:'Café y pandebono',      fecha:d(7) },
-      { id:uid(), tipo:'gasto', cat:'hormiga',   monto:18000,  desc:'Domicilio antojo',      fecha:d(10) },
-      { id:uid(), tipo:'gasto', cat:'hormiga',   monto:15000,  desc:'Mecato oficina',        fecha:d(13) },
-      { id:uid(), tipo:'gasto', cat:'hormiga',   monto:22000,  desc:'App de domicilios',     fecha:d(19) },
-      { id:uid(), tipo:'gasto', cat:'ropa',      monto:120000, desc:'Camiseta y medias',     fecha:d(17) },
-      { id:uid(), tipo:'gasto', cat:'salud',     monto:60000,  desc:'Medicamentos',          fecha:d(9) }
+      { id:uid(), tipo:'gasto', cat:'entret',    monto:95000,  desc:'Cine y salida',         fecha:d(14), sub:'Cine' },
+      { id:uid(), tipo:'gasto', cat:'hormiga',   monto:12000,  desc:'Café y pandebono',      fecha:d(7), sub:'Café' },
+      { id:uid(), tipo:'gasto', cat:'hormiga',   monto:18000,  desc:'Domicilio antojo',      fecha:d(10), sub:'Domicilios' },
+      { id:uid(), tipo:'gasto', cat:'hormiga',   monto:15000,  desc:'Mecato oficina',        fecha:d(13), sub:'Mecato' },
+      { id:uid(), tipo:'gasto', cat:'hormiga',   monto:22000,  desc:'App de domicilios',     fecha:d(19), sub:'Domicilios' },
+      { id:uid(), tipo:'gasto', cat:'otros',     monto:120000, desc:'Camiseta y medias',     fecha:d(17), sub:'Ropa' },
+      { id:uid(), tipo:'gasto', cat:'salud',     monto:60000,  desc:'Medicamentos',          fecha:d(9), sub:'Medicinas' }
     ],
     debts: [
       // El saldo ya refleja el pago de 220.000 registrado arriba
@@ -2010,8 +2136,8 @@ function enterDemo() {
     ],
     fixed: [
       { id:fixSueldo,    nombre:'Mi sueldo',             monto:2400000, tipo:'ingreso', cat:'salario',  freq:'mensual' },
-      { id:fixArriendo,  nombre:'Arriendo',              monto:850000, tipo:'gasto', cat:'vivienda',    freq:'mensual' },
-      { id:fixServicios, nombre:'Luz, agua e internet',  monto:180000, tipo:'gasto', cat:'servicios',   freq:'mensual' },
+      { id:fixArriendo,  nombre:'Arriendo',              monto:850000, tipo:'gasto', cat:'vivienda', sub:'Arriendo', freq:'mensual' },
+      { id:fixServicios, nombre:'Internet',              monto:65000,  tipo:'gasto', cat:'vivienda', sub:'Internet', freq:'mensual' },
       { id:fixCuota,     nombre:'Cuota tarjeta',         monto:220000, tipo:'gasto', cat:'deudapago', debtId:tcId, freq:'mensual' },
       { id:uid(),        nombre:'Ahorro',                monto:100000, tipo:'ahorro', cat:'ahorrogen',  freq:'quincenal' }
     ],
