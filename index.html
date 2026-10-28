@@ -735,6 +735,8 @@
     <input type="file" id="restoreFile" accept=".json,application/json" style="display:none">
     <p id="backupInfo" style="font-size:13px;color:var(--muted);margin:8px 0 20px"></p>
 
+    <div id="subsBox"></div>
+
     <button class="btn soft full" id="demoBtn">✨ Ver cómo funciona con datos de ejemplo</button>
     <p style="font-size:13px;color:var(--muted);margin:8px 0 20px">Es solo para mirar: tus datos reales no se tocan y vuelves a ellos cuando salgas del ejemplo.</p>
     <div style="border-top:1px solid var(--line);padding-top:16px">
@@ -744,7 +746,7 @@
     <div class="actions">
       <button class="btn soft" id="setClose">Cerrar</button>
     </div>
-    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:12px">Mi Plata · versión 4.3</p>
+    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:12px">Mi Plata · versión 4.4</p>
   </div>
 </div>
 
@@ -1437,6 +1439,7 @@ function renderFixChips() {
     `<button class="chip ${c.id === fixCat ? 'on' : ''}" data-fixcat="${c.id}">${c.emoji} ${c.name}</button>`
   ).join('');
   const subs = fixTipo === 'gasto' ? subsFor(fixCat) : [];
+  if (subs.length && fixSub && !subs.includes(fixSub)) subs.push(fixSub);
   $('#fixSubField').style.display = subs.length ? 'block' : 'none';
   $('#fixSubs').innerHTML = subs.map(x =>
     `<button class="chip ${x === fixSub ? 'on' : ''}" data-fixsub="${esc(x)}">${esc(x)}</button>`).join('') +
@@ -1699,6 +1702,7 @@ function renderChips() {
   const cats = pickCats(movTipo, movCat);
   if (movCat && !cats.some(c => c.id === movCat)) movCat = null;
   const subs = movTipo === 'gasto' && movCat ? subsFor(movCat) : [];
+  if (subs.length && movSub && !subs.includes(movSub)) subs.push(movSub);
   const box = $('#movChips');
   if (subs.length && !showAllTiles) {
     // Category chosen: fold the tiles and ask for the detail
@@ -1858,7 +1862,7 @@ $('#movSave').addEventListener('click', () => {
   const tpl = pendingFixedId ? data.fixed.find(f => f.id === pendingFixedId) : null;
   const nomina = !!(debt && (debt.nomina || (old && old.nomina && old.debtId === linkDebt) ||
     (tpl && tpl.nomina && tpl.debtId === linkDebt)));
-  const sub = movTipo === 'gasto' && movSub && subsFor(movCat).includes(movSub) ? movSub : '';
+  const sub = movTipo === 'gasto' && movSub ? movSub : ''; // cleared whenever the category changes
   const payload = { tipo: movTipo, cat: movCat, sub, monto, desc: $('#movDesc').value.trim(), fecha, debtId: linkDebt, nomina, fixedId: pendingFixedId };
   if (editingMovId) {
     const i = data.movs.findIndex(m => m.id === editingMovId);
@@ -1987,7 +1991,30 @@ $('#sPay').addEventListener('change', e => {
   if (data.settings.pay === 'quincenal') currentQ = finPeriod(today()).q;
   save(); render();
 });
+// Own subcategories (made with "＋ Otra") can be removed; past records keep their text
+function renderSubsBox() {
+  const own = Object.entries(data.subs || {}).flatMap(([cat, list]) => list.map(name => ({ cat, name })));
+  if (!own.length) { $('#subsBox').innerHTML = ''; return; }
+  $('#subsBox').innerHTML = `<p style="font-size:15px;font-weight:700;margin-bottom:4px">🏷️ Tus subcategorías</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:6px">Las que creaste con "＋ Otra". Si borras una, lo que ya anotaste con ella no cambia.</p>
+    <div style="margin-bottom:20px">${own.map(o => {
+      const c = catById(o.cat);
+      return `<div class="acct"><div class="n" style="cursor:default">${esc(o.name)}<small>${c.emoji} ${esc(c.name)}</small></div>
+        <button class="btn danger small" data-delsub="${esc(o.cat)}" data-subname="${esc(o.name)}">Borrar</button></div>`;
+    }).join('')}</div>`;
+}
+$('#subsBox').addEventListener('click', e => {
+  const b = e.target.closest('[data-delsub]');
+  if (!b) return;
+  const cat = b.dataset.delsub, name = b.dataset.subname;
+  const used = data.movs.filter(m => m.cat === cat && m.sub === name).length;
+  if (!confirm(`¿Borrar la subcategoría "${name}"?` + (used ? `\n\nYa la usaste ${used} ${used === 1 ? 'vez' : 'veces'}: esos registros se quedan como están.` : ''))) return;
+  data.subs[cat] = data.subs[cat].filter(x => x !== name);
+  if (!data.subs[cat].length) delete data.subs[cat];
+  save(); renderSubsBox(); render();
+});
 function renderSettings() {
+  renderSubsBox();
   $('#sName').value = data.settings.name || '';
   $('#sPay').value = data.settings.pay || 'mensual';
   $('#installBox').innerHTML = isStandalone()
