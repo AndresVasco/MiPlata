@@ -1,6 +1,6 @@
 /* Mi Plata — service worker: lets the installed app open without internet.
    Network first (so updates arrive as soon as they're published), cache as fallback. */
-const CACHE = 'miplata-v2';
+const CACHE = 'miplata-v3';
 const FILES = ['./', './index.html', './manifest.webmanifest',
   './icons/apple-touch-icon.png', './icons/icon-192.png', './icons/icon-512.png', './icons/favicon-32.png',
   './fonts/playfair-display.woff2', './fonts/nunito-sans.woff2'];
