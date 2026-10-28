@@ -12,7 +12,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Mi Plata">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#F3F6F5">
+<meta name="theme-color" content="#FBF1F3">
 <style>
   :root{
     --bg:#F3F6F5;
@@ -46,7 +46,9 @@
     font-size:16px;
     line-height:1.45;
   }
-  @font-face{font-family:'Outfit';src:local('Outfit');font-display:swap}
+  /* Letras guardadas en la app (funcionan sin internet) */
+  @font-face{font-family:'Playfair Display';src:url(fonts/playfair-display.woff2) format('woff2');font-weight:400 900;font-display:swap}
+  @font-face{font-family:'Nunito Sans';src:url(fonts/nunito-sans.woff2) format('woff2');font-weight:200 1000;font-display:swap}
 
   .app{max-width:520px;margin:0 auto;padding:16px 16px 0}
   @media(min-width:900px){
@@ -391,6 +393,71 @@
   @media(prefers-reduced-motion:reduce){
     *{transition:none!important;animation:none!important}
   }
+
+  /* =====================================================
+     TEMA "Rosa y champán": pasteles, letras con serifa en
+     títulos y montos, sombras suaves y tarjetas translúcidas.
+     Sobrescribe los colores base definidos arriba.
+     ===================================================== */
+:root{
+  --bg:#FBF3F2; --surface:#FFFFFF; --ink:#3D2A33; --muted:#8B7179; --line:#F1DDE2;
+  --green:#7FBFA3; --green-soft:#E6F4EC; --red:#E59AA8; --red-soft:#FCE6EA;
+  --amber:#D9A066; --amber-soft:#FCEBD8; --violet:#B49ADB; --violet-soft:#EFE8FA;
+  --teal:#86BFD3; --teal-soft:#E4F2F7;
+  --radius:24px; --font:'Nunito Sans',system-ui,sans-serif;
+  --shadow:0 10px 30px -12px rgba(176,98,124,.28), 0 2px 6px -2px rgba(176,98,124,.10);
+}
+body{background:radial-gradient(1200px 600px at 100% -10%,#F9D9E3 0%,transparent 60%),radial-gradient(900px 500px at -20% 30%,#FCE8DA 0%,transparent 55%),linear-gradient(180deg,#FFF8F5,#FBF1F3) fixed;font-family:var(--font);color:var(--ink);letter-spacing:.1px}
+.brand h1,.q,.card h3.big,.hero .v,.onb h1,.amt-box .v,.debt h3,.month-nav b,.sheet h3,.hello{font-family:'Playfair Display',Georgia,serif;letter-spacing:-.2px}
+.brand h1{font-size:24px;font-weight:600}
+.brand .logo{background:linear-gradient(135deg,#E7A3B6,#C98AA8);color:#fff;box-shadow:0 6px 16px -6px rgba(176,98,124,.28);border-radius:14px}
+.card,.month-nav,.sheet,.kpi{background:rgba(255,255,255,.82);border:1px solid rgba(232,190,200,.45);box-shadow:var(--shadow);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.card{border-radius:26px}
+.month-pick,#settingsBtn{background:rgba(255,255,255,.82);border:1px solid rgba(232,190,200,.45);color:var(--ink);box-shadow:var(--shadow)}
+.month-nav button{background:#FBEFF1;color:var(--ink)}
+.period-seg{background:rgba(255,255,255,.82);border:1px solid rgba(232,190,200,.45)}
+.period-seg button.on,.seg-toggle button.on.plain{background:linear-gradient(135deg,#C98AA0,#B07390);color:#FFFFFF}
+/* Hero */
+.hero{color:#4A2633;box-shadow:0 18px 40px -18px rgba(176,98,124,.28);border:1px solid rgba(255,255,255,.55);position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;inset:-40% -20% auto auto;width:70%;height:120%;background:radial-gradient(closest-side,rgba(255,255,255,.55),transparent);pointer-events:none}
+.hero.ok{background:linear-gradient(135deg,#CFEBDD 0%,#F4DCE4 100%)}.hero.warn{background:linear-gradient(135deg,#FBE0C8 0%,#F7CFD9 100%)}.hero.bad{background:linear-gradient(135deg,#F8C8D2 0%,#F3B7C4 100%)}.hero.empty{background:linear-gradient(135deg,#F3E3EA 0%,#EDE3F6 100%)}
+.hero .l,.hero .s,.hero p{opacity:1;color:#5E3442}
+.hero .v{font-weight:600;font-size:48px}
+body,.hero .v,.amt-box .v,.m,.amt{font-variant-numeric:lining-nums tabular-nums;font-feature-settings:'lnum' 1}
+.hero .bar{background:rgba(255,255,255,.55)}.hero .bar i{background:linear-gradient(90deg,#C77D96,#E8A3B5)}
+.hero .parts{border-top-color:rgba(255,255,255,.6);color:#5E3442}
+/* Quick buttons */
+.qb{border:1px solid rgba(255,255,255,.7);box-shadow:0 12px 24px -14px rgba(176,98,124,.28);font-weight:700}
+.qb.gasto{background:linear-gradient(160deg,#F8C9D3,#EFA9B9);color:#5B2534}
+.qb.ingreso{background:linear-gradient(160deg,#CDEBDC,#A9D8C2);color:#24533F}
+.qb.ahorro{background:linear-gradient(160deg,#D9E9F7,#B9D4EE);color:#284763}
+/* Buttons */
+.btn.primary,.fab{background:linear-gradient(135deg,#C98AA0,#B07390);color:#FFFFFF;box-shadow:0 10px 22px -12px rgba(176,98,124,.28)}
+.btn.soft{background:#FBEFF1;color:var(--ink)}
+.btn.danger{background:var(--red-soft);color:#B5536A}
+.linkbtn{color:#B0617E}
+/* Tabs */
+.tabbar{background:rgba(255,250,251,.82);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid rgba(232,190,200,.45)}
+.tab.active{color:#B0617E}
+/* Lists & accents */
+.catrow .ic,.mrow .ic,.item .emoji{background:#FBEFF1}
+.chk.ok{background:#7FBFA3;border-color:#7FBFA3}
+.tile,.chip{background:rgba(255,255,255,.82);border-color:#F1DDE2}
+.tile.on,.chip.on,.picked{border-color:#D493A9;background:#FBEAF0;color:#8E3E5B}
+.mrow .m.out{color:#B5536A}.mrow .m.in,.acct .m.in{color:#3E8A6B}.mrow .m.sv,.acct .m.sv{color:#3F8199}
+.prog{background:var(--violet-soft)}.prog i{background:linear-gradient(90deg,#C9B2EC,#A58BD6)}
+.prog.teal{background:var(--teal-soft)}.prog.teal i{background:linear-gradient(90deg,#A9D6E4,#7FB6CC)}
+.insight{border:1px solid rgba(255,255,255,.6)}
+.amt-box{background:rgba(255,255,255,.82)}
+.amt-box.gasto{border-color:#E59AA8}.amt-box.ingreso{border-color:#7FBFA3}.amt-box.ahorro{border-color:linear-gradient(90deg,#A9D6E4,#7FB6CC)}
+.keys button{background:#FBEFF1}
+.seg-toggle{background:#FBEFF1}
+.seg-toggle button.on.gasto{background:linear-gradient(160deg,#F8C9D3,#EFA9B9);color:#5B2534}
+.seg-toggle button.on.ingreso{background:linear-gradient(160deg,#CDEBDC,#A9D8C2);color:#24533F}
+.seg-toggle button.on.ahorro{background:linear-gradient(160deg,#D9E9F7,#B9D4EE);color:#284763}
+.due{border-color:#FCEBD8}
+  .hello{margin:-4px 0 12px;font-size:22px;font-weight:600;grid-column:1 / -1}
+  .onb{background:radial-gradient(900px 500px at 100% -10%,#F9D9E3 0%,transparent 60%),radial-gradient(700px 500px at -20% 40%,#FCE8DA 0%,transparent 55%),#FFF8F5}
 </style>
 </head>
 <body>
@@ -407,6 +474,8 @@
     </div>
     <button class="month-pick" id="settingsBtn" aria-label="Ajustes" style="cursor:pointer;font-size:18px;padding:8px 14px">⚙️ Ajustes</button>
   </header>
+
+  <p class="hello" id="hello" style="display:none"></p>
 
   <div class="month-nav">
     <button id="mPrev" aria-label="Mes anterior">‹</button>
@@ -436,7 +505,6 @@
 
     <!-- ============ VISTA: RESUMEN ============ -->
     <section data-view="resumen" class="active">
-      <p class="hello" id="hello" style="display:none"></p>
       <div id="dueBox"></div>
       <div id="hero" class="hero empty"></div>
 
@@ -809,7 +877,7 @@
     <div class="actions">
       <button class="btn soft" id="setClose">Cerrar</button>
     </div>
-    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:12px">Mi Plata · versión 4.5</p>
+    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:12px">Mi Plata · versión 5.0</p>
   </div>
 </div>
 
@@ -854,28 +922,28 @@ const store = (() => {
 
 /* ---------- Categories ---------- */
 const CATS_GASTO = [
-  { id:'vivienda',  name:'Casa y servicios', emoji:'🏠', color:'#3E7CB1', kind:'necesidad' },
-  { id:'comida',    name:'Comida',          emoji:'🍽️', color:'#E07A3F', kind:'necesidad' },
-  { id:'transporte',name:'Transporte',      emoji:'🚌', color:'#5AA469', kind:'necesidad' },
-  { id:'servicios', name:'Servicios',       emoji:'📱', color:'#7A6FBE', kind:'necesidad' },
-  { id:'salud',     name:'Salud',           emoji:'💊', color:'#4FA3A5', kind:'necesidad' },
-  { id:'educacion', name:'Educación',       emoji:'📚', color:'#946B4A', kind:'necesidad' },
-  { id:'entret',    name:'Diversión',       emoji:'🎉', color:'#D6567E', kind:'gusto' },
-  { id:'ropa',      name:'Ropa',            emoji:'👕', color:'#C58F2E', kind:'gusto' },
-  { id:'hormiga',   name:'Antojos',         emoji:'🐜', color:'#8A5A44', kind:'gusto' },
-  { id:'deudapago', name:'Pago de deudas',  emoji:'💳', color:'#6A5AE0', kind:'necesidad' },
-  { id:'otros',     name:'Otros',           emoji:'📦', color:'#7B8B89', kind:'gusto' }
+  { id:'vivienda',  name:'Casa y servicios', emoji:'🏠', color:'#E3A6B8', kind:'necesidad' },
+  { id:'comida',    name:'Comida',          emoji:'🍽️', color:'#F2BE9C', kind:'necesidad' },
+  { id:'transporte',name:'Transporte',      emoji:'🚌', color:'#9FD0B8', kind:'necesidad' },
+  { id:'servicios', name:'Servicios',       emoji:'📱', color:'#E3A6B8', kind:'necesidad' },
+  { id:'salud',     name:'Salud',           emoji:'💊', color:'#9EC6E2', kind:'necesidad' },
+  { id:'educacion', name:'Educación',       emoji:'📚', color:'#D9C08F', kind:'necesidad' },
+  { id:'entret',    name:'Diversión',       emoji:'🎉', color:'#C6A8E0', kind:'gusto' },
+  { id:'ropa',      name:'Ropa',            emoji:'👕', color:'#F0B8C8', kind:'gusto' },
+  { id:'hormiga',   name:'Antojos',         emoji:'🐜', color:'#D6A48C', kind:'gusto' },
+  { id:'deudapago', name:'Pago de deudas',  emoji:'💳', color:'#B49ADB', kind:'necesidad' },
+  { id:'otros',     name:'Otros',           emoji:'📦', color:'#C9B8BE', kind:'gusto' }
 ];
 const CATS_INGRESO = [
-  { id:'salario',  name:'Salario',   emoji:'💼', color:'#199473' },
-  { id:'negocio',  name:'Negocio',   emoji:'🏪', color:'#127a5f' },
-  { id:'freelance',name:'Freelance', emoji:'💻', color:'#1fae87' },
-  { id:'otrosing', name:'Otros',     emoji:'🎁', color:'#5AA469' }
+  { id:'salario',  name:'Salario',   emoji:'💼', color:'#9FD0B8' },
+  { id:'negocio',  name:'Negocio',   emoji:'🏪', color:'#8CC4AA' },
+  { id:'freelance',name:'Freelance', emoji:'💻', color:'#B5DCC8' },
+  { id:'otrosing', name:'Otros',     emoji:'🎁', color:'#A9D6C0' }
 ];
 const CATS_AHORRO = [
-  { id:'ahorrogen',  name:'Ahorro general',      emoji:'🐷', color:'#0E8A9E' },
-  { id:'emergencia', name:'Fondo de emergencia', emoji:'🚨', color:'#0B6E7E' },
-  { id:'meta',       name:'Para una meta',       emoji:'🎯', color:'#12A3BA' }
+  { id:'ahorrogen',  name:'Ahorro general',      emoji:'🐷', color:'#9EC6E2' },
+  { id:'emergencia', name:'Fondo de emergencia', emoji:'🚨', color:'#8BB7D6' },
+  { id:'meta',       name:'Para una meta',       emoji:'🎯', color:'#B3D3EA' }
 ];
 // What the big picker shows (the rest stay valid for older records)
 const PICK = {
@@ -931,7 +999,7 @@ function pickCats(tipo, current) {
 const catById = id =>
   CATS_GASTO.find(c => c.id === id) || CATS_INGRESO.find(c => c.id === id) ||
   CATS_AHORRO.find(c => c.id === id) ||
-  { id, name:id, emoji:'📦', color:'#7B8B89', kind:'gusto' };
+  { id, name:id, emoji:'📦', color:'#C9B8BE', kind:'gusto' };
 
 /* ---------- State ---------- */
 // Local calendar date (YYYY-MM-DD). toISOString() is UTC, which in Colombia
@@ -1066,7 +1134,7 @@ function render() {
   $('#periodSeg').style.display = quin ? 'flex' : 'none';
   if (!quin) currentQ = 'all';
   const name = data.settings && data.settings.name;
-  $('#hello').style.display = name ? 'block' : 'none';
+  $('#hello').style.display = name && currentView === 'resumen' ? 'block' : 'none';
   $('#hello').textContent = name ? `Hola, ${name} 👋` : '';
   renderMonthNav();
   renderPeriodSeg();
@@ -1849,6 +1917,7 @@ function renderDebts(M) {
 /* ---------- Navigation ---------- */
 function goTo(view) {
   currentView = view;
+  $('#hello').style.display = data.settings && data.settings.name && view === 'resumen' ? 'block' : 'none';
   // Inicio has its own three big buttons; the other tabs get the "＋ Anotar" bar
   $('#fab').style.display = view === 'resumen' ? 'none' : 'flex';
   document.body.classList.toggle('has-addbar', view !== 'resumen');
